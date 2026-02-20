@@ -22,13 +22,14 @@ credentials:
     description: "On-premise Endpoint Central server URL (e.g. https://ec.yourdomain.local:8443)"
     scope: "shared"
     required: true
-  - name: "Endpoint Central Auth Token"
+  - name: "Endpoint Central Operator Token"
     env_var: "EC_AUTH_TOKEN"
     description: >
-      API authentication token generated from Endpoint Central
+      Per-user API authentication token generated from Endpoint Central
       Admin > Integrations > API Explorer > Authentication.
-      Passed as Authorization header on all requests.
-    scope: "shared"
+      Each operator should generate their own token so actions are
+      attributed to the correct user account.
+    scope: "per-operator"
     required: true
 
 dependencies:

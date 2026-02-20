@@ -20,9 +20,11 @@ metadata:
 credentials:
   - key: auth_token
     env: EC_AUTH_TOKEN
-    description: API auth token from Endpoint Central Admin > Integrations > API Explorer
+    scope: per-operator
+    description: Per-user API token from Endpoint Central Admin > Integrations > API Explorer
   - key: instance_url
     env: EC_INSTANCE_URL
+    scope: shared
     description: On-premise server URL (e.g. https://ec.yourdomain.local:8443)
 ---
 
@@ -32,11 +34,13 @@ Full programmatic access to a ManageEngine Endpoint Central on-premise server vi
 
 ## Authentication
 
-- **Type:** Static API token
+- **Type:** Per-operator API token
 - **API Base:** `{EC_INSTANCE_URL}/api/1.4`
 - **Auth header:** `Authorization: {EC_AUTH_TOKEN}`
-- **Token generation:** Endpoint Central Admin > Integrations > API Explorer > Authentication
-- **Credentials:** `EC_AUTH_TOKEN` and `EC_INSTANCE_URL` in container environment
+- **Token generation:** Each user generates their own token from Endpoint Central Admin > Integrations > API Explorer > Authentication
+- **Per-operator:** `EC_AUTH_TOKEN` is injected per-operator from the Tendril credential vault, so actions are attributed to the correct user
+- **Fallback:** If no per-operator token is set, the bridge falls back to `EC_ADMIN_TOKEN` (service account) from the container environment
+- **Instance URL:** `EC_INSTANCE_URL` is shared (same server for all operators)
 
 ## Tools
 
@@ -236,5 +240,6 @@ The CLI `--search` flag on inventory commands wraps this automatically.
 
 - **Deployment:** On-premise (not cloud)
 - **API Version:** 1.4
-- **Server URL:** Configured via `EC_INSTANCE_URL`
+- **Server URL:** Configured via `EC_INSTANCE_URL` (shared)
+- **Auth model:** Per-operator tokens (each user has their own API key)
 - **Domains, groups, offices:** Discovered via `server properties` command

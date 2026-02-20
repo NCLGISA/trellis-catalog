@@ -21,7 +21,7 @@ import requests
 import urllib3
 
 INSTANCE = os.environ.get("EC_INSTANCE_URL", "").rstrip("/")
-AUTH_TOKEN = os.environ.get("EC_AUTH_TOKEN", "")
+AUTH_TOKEN = os.environ.get("EC_AUTH_TOKEN", "") or os.environ.get("EC_ADMIN_TOKEN", "")
 USERNAME = os.environ.get("EC_USERNAME", "")
 PASSWORD = os.environ.get("EC_PASSWORD", "")
 VERIFY_SSL = os.environ.get("EC_VERIFY_SSL", "false").lower() not in ("false", "0", "no")
