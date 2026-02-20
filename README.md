@@ -11,6 +11,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [cloudflare](bridges/cloudflare/) | networking | Cloudflare API -- DNS, WAF, Zero Trust, tunnels |
 | [freshservice](bridges/freshservice/) | itsm | Freshservice ITSM -- tickets, CMDB, change management, assets |
 | [microsoft-graph](bridges/microsoft-graph/) | identity | Microsoft Graph API -- Entra ID, Exchange, Intune, Teams, LAPS |
+| [servicedesk-plus](bridges/servicedesk-plus/) | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
 | [zoom](bridges/zoom/) | collaboration | Zoom Server-to-Server OAuth -- meetings, users, phone admin |
 
 ## Using These Bridges
