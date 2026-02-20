@@ -1,0 +1,81 @@
+name: Validate Bridges
+
+on:
+  pull_request:
+    paths:
+      - "bridges/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download latest Trellis CLI
+        run: |
+          LATEST=$(gh release view --repo NCLGISA/trellis --json tagName -q .tagName)
+          gh release download "$LATEST" --repo NCLGISA/trellis --pattern "trellis-linux-amd64" --dir .
+          chmod +x trellis-linux-amd64
+          mv trellis-linux-amd64 /usr/local/bin/trellis
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect changed bridges
+        id: changed
+        run: |
+          BRIDGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
+            | grep '^bridges/' \
+            | cut -d'/' -f2 \
+            | sort -u)
+          echo "bridges=$BRIDGES" >> "$GITHUB_OUTPUT"
+          echo "Changed bridges: $BRIDGES"
+
+      - name: Validate bridge manifests
+        run: |
+          EXIT=0
+          for bridge in ${{ steps.changed.outputs.bridges }}; do
+            echo "--- Validating $bridge ---"
+            if [ ! -f "bridges/$bridge/bridge.yaml" ]; then
+              echo "SKIP: no bridge.yaml"
+              continue
+            fi
+            trellis validate "$bridge" --human || EXIT=1
+          done
+          exit $EXIT
+        working-directory: ${{ github.workspace }}
+
+      - name: Check entrypoint permissions
+        run: |
+          EXIT=0
+          for bridge in bridges/*/; do
+            EP="$bridge/entrypoint.sh"
+            if [ -f "$EP" ] && [ ! -x "$EP" ]; then
+              echo "ERROR: $EP is not executable (chmod +x required)"
+              EXIT=1
+            fi
+          done
+          exit $EXIT
+
+      - name: Validate SKILL.md frontmatter
+        run: |
+          EXIT=0
+          for skill in bridges/*/skills/*/SKILL.md; do
+            [ -f "$skill" ] || continue
+            if ! head -1 "$skill" | grep -q '^---'; then
+              echo "ERROR: $skill missing YAML frontmatter"
+              EXIT=1
+            fi
+          done
+          exit $EXIT
+
+      - name: Sanitization check
+        run: |
+          EXIT=0
+          PATTERNS="rowancountync\.gov|10\.1\.[0-9]|192\.168\.[0-9]|\.internal\.|AKIAIOSFODNN7EXAMPLE"
+          for bridge in bridges/*/; do
+            if grep -rEi "$PATTERNS" "$bridge" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.md" --include="*.sh"; then
+              echo "ERROR: Organization-specific content found in $bridge"
+              EXIT=1
+            fi
+          done
+          exit $EXIT

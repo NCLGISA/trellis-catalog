@@ -1,0 +1,49 @@
+# ============================================================================
+# Tendril Bridge Manifest - Microsoft Graph
+# ============================================================================
+# Microsoft Graph API bridge -- Entra ID, Exchange Online, Intune, SharePoint,
+# Teams, Defender, LAPS, licenses, Conditional Access, and audit logs.
+# ============================================================================
+
+name: microsoft-graph
+version: "2026.02.19.1"
+description: "Microsoft Graph API bridge for Entra ID, Exchange Online, Intune, SharePoint, Teams, Defender, and LAPS"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-microsoft-graph"
+  timezone: "UTC"
+
+credentials:
+  - name: "Azure Tenant ID"
+    env_var: "AZURE_TENANT_ID"
+    description: "Entra ID tenant ID for app registration authentication"
+    scope: "shared"
+    required: true
+  - name: "Graph Client ID"
+    env_var: "GRAPH_CLIENT_ID"
+    description: "App registration client ID with Graph API permissions"
+    scope: "shared"
+    required: true
+  - name: "Graph Client Secret"
+    env_var: "GRAPH_CLIENT_SECRET"
+    description: "App registration client secret"
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+    - "msal>=1.28.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/graph_check.py"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "identity"
+  tags: "microsoft, m365, graph, entra-id, exchange-online, intune, sharepoint, teams, defender, laps"

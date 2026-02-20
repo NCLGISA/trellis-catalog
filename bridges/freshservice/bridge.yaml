@@ -1,0 +1,46 @@
+# ============================================================================
+# Tendril Bridge Manifest - Freshservice
+# ============================================================================
+# Freshservice REST API bridge -- CMDB, change management, asset sync,
+# incident lifecycle, ticket search, and server documentation generation.
+# ============================================================================
+
+name: freshservice
+version: "2026.02.19.1"
+description: "Freshservice REST API bridge for CMDB, change management, asset sync, tickets, and server documentation"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-freshservice"
+  timezone: "UTC"
+
+credentials:
+  - name: "Freshservice Domain"
+    env_var: "FRESHSERVICE_DOMAIN"
+    description: "Freshservice tenant domain (e.g. yourorg.freshservice.com)"
+    scope: "shared"
+    required: true
+  - name: "Freshservice API Key"
+    env_var: "FRESHSERVICE_API_KEY"
+    description: >
+      Freshservice REST API key for operator-specific authentication.
+      Used as Basic auth username with 'X' as password.
+      Generate from Freshservice > Profile > API Key.
+    scope: "per-operator"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/freshservice_client.py"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "itsm"
+  tags: "freshservice, itsm, cmdb, change-management, assets, tickets"

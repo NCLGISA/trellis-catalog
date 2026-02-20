@@ -1,0 +1,41 @@
+# ============================================================================
+# Tendril Bridge Manifest - Meraki
+# ============================================================================
+# Cisco Meraki Dashboard API bridge -- SD-WAN, wireless, switching, VPN,
+# firewall, firmware, and client visibility across 52 networks / 357 devices.
+# ============================================================================
+
+name: meraki
+version: "2026.02.19.1"
+description: "Cisco Meraki Dashboard API bridge for SD-WAN, wireless, switching, VPN, and firewall management"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-meraki"
+  timezone: "UTC"
+
+credentials:
+  - name: "Meraki API Key"
+    env_var: "MERAKI_API_KEY"
+    description: >
+      Meraki Dashboard API key. Generate from Dashboard > Organization >
+      Settings > Dashboard API access, or My Profile > API access.
+      Should belong to a service account with full org read access.
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/meraki_check.py"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "networking"
+  tags: "cisco, meraki, sdwan, wireless, switches, appliances, firewall, vpn, firmware, clients"

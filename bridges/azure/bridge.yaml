@@ -1,0 +1,60 @@
+# ============================================================================
+# Tendril Bridge Manifest - Azure
+# ============================================================================
+# Azure Resource Manager bridge -- VMs, NSGs, storage, AVD, Arc, Key Vault,
+# Recovery Services, SQL, monitoring, and cost data via az CLI and REST API.
+# ============================================================================
+
+name: azure
+version: "2026.02.19.1"
+description: "Azure Resource Manager bridge for VMs, NSGs, storage, AVD, Arc, Key Vault, Recovery Services, SQL, and monitoring"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-azure"
+  timezone: "UTC"
+
+credentials:
+  - name: "Azure Tenant ID"
+    env_var: "AZURE_TENANT_ID"
+    description: "Entra ID tenant ID for service principal authentication"
+    scope: "shared"
+    required: true
+  - name: "Azure Client ID"
+    env_var: "AZURE_CLIENT_ID"
+    description: "App registration client ID (service principal)"
+    scope: "shared"
+    required: true
+  - name: "Azure Client Secret"
+    env_var: "AZURE_CLIENT_SECRET"
+    description: "App registration client secret"
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+    - "msal>=1.28.0"
+  system:
+    - "curl"
+    - "ca-certificates"
+    - "procps"
+    - "iputils-ping"
+    - "iproute2"
+    - "dnsutils"
+    - "net-tools"
+    - "traceroute"
+    - "gnupg"
+    - "lsb-release"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/arm_check.py"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "cloud"
+  tags: "azure, arm, compute, networking, avd, storage, keyvault, recovery, sql, arc, monitoring"

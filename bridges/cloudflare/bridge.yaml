@@ -1,0 +1,52 @@
+# ============================================================================
+# Tendril Bridge Manifest - Cloudflare
+# ============================================================================
+# Cloudflare API bridge -- DNS zones, tunnels, Zero Trust (Access, Gateway),
+# email routing, WAF, SSL/TLS, and caching via API v4.
+# ============================================================================
+
+name: cloudflare
+version: "2026.02.19.1"
+description: "Cloudflare API bridge for DNS, tunnels, Zero Trust, email routing, WAF, and SSL/TLS management"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-cloudflare"
+  timezone: "UTC"
+
+credentials:
+  - name: "Cloudflare API Token"
+    env_var: "CLOUDFLARE_API_TOKEN"
+    description: >
+      Cloudflare API token with zone and account-level read permissions.
+      Create at Dashboard > My Profile > API Tokens.
+    scope: "shared"
+    required: true
+  - name: "Cloudflare Account ID"
+    env_var: "CLOUDFLARE_ACCOUNT_ID"
+    description: "Cloudflare account identifier"
+    scope: "shared"
+    required: true
+  - name: "Cloudflare Operator Token"
+    env_var: "CLOUDFLARE_OPERATOR_TOKEN"
+    description: >
+      Personal Cloudflare API token with User-level API Tokens: Edit permission.
+      Enables programmatic token management per operator.
+    scope: "per-operator"
+    required: false
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/cloudflare_check.py"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "networking"
+  tags: "cloudflare, dns, tunnels, zero-trust, email, waf, ssl, security"

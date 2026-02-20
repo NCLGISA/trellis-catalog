@@ -1,0 +1,561 @@
+{
+  "_meta": {
+    "last_refreshed": "2026-02-17T14:39:54.620198+00:00",
+    "app_count": 24,
+    "connector_host": "is01s114",
+    "ztna_tag": "IsAccessibleViaZTNAClient"
+  },
+  "apps": [
+    {
+      "name": "Miscellaneous Report Server",
+      "sp_id": "102c701a-6b74-4977-a87e-7252057763c4",
+      "app_id": "6165a9ef-407b-48bc-be40-c006d8353f40",
+      "groups": [
+        {
+          "id": "a2835af1-3451-47dd-960f-f26b50671fa2",
+          "name": "Intune Miscellaneous Reports"
+        }
+      ],
+      "direct_users": [],
+      "aliases": []
+    },
+    {
+      "name": "Cott Systems - Resolution III",
+      "sp_id": "1ff2a42a-fb2f-471c-82ad-802bb36838df",
+      "app_id": "92414ca9-f23d-43af-b005-264f72d7c60c",
+      "groups": [
+        {
+          "id": "d4d92591-651e-44ec-87d7-b969d43cedbe",
+          "name": "RD-COM"
+        },
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "cott",
+        "cott systems",
+        "iii",
+        "register of deeds",
+        "resolution",
+        "resolution iii",
+        "rod"
+      ]
+    },
+    {
+      "name": "Synology NAS",
+      "sp_id": "37ba2923-f4a1-416d-9d38-dcb7a5b68835",
+      "app_id": "cf85e8b1-8355-4966-9aae-69be87536723",
+      "groups": [
+        {
+          "id": "88174ae2-1366-416a-9d86-097ca45cef03",
+          "name": "Information Technology"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "file share",
+        "nas"
+      ]
+    },
+    {
+      "name": "FiveStar - Debt Set-Off",
+      "sp_id": "3a114ffa-0882-479b-bd70-b598c5d945d3",
+      "app_id": "8a475f14-c433-48ca-8f80-0b013b3efc35",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        }
+      ],
+      "aliases": [
+        "debt",
+        "debt set-off",
+        "fivestar",
+        "set-off"
+      ]
+    },
+    {
+      "name": "Cisco - Umbrella Virtual Appliances",
+      "sp_id": "4967a0fd-7c05-43d3-928b-fe108d6456eb",
+      "app_id": "6d05cf6c-67dd-417e-93da-d3373dc431f5",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        }
+      ],
+      "aliases": [
+        "appliances",
+        "cisco",
+        "cisco umbrella",
+        "dns security",
+        "umbrella",
+        "umbrella virtual appliances",
+        "virtual"
+      ]
+    },
+    {
+      "name": "CentralSquare - OneSolution CAD",
+      "sp_id": "72b01ddf-06c1-48b9-8d64-6ce343cff2ea",
+      "app_id": "2bfb532c-4b13-441f-8d96-22fd312b2163",
+      "groups": [
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        },
+        {
+          "id": "093300db-fed7-4b2f-af10-b1771fc9f690",
+          "name": "SD-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "cad",
+        "centralsquare",
+        "dispatch",
+        "onesolution",
+        "onesolution cad"
+      ]
+    },
+    {
+      "name": "Priority Dispatch - ProQA Aqua",
+      "sp_id": "7459bca7-ba7e-4d2c-9ec4-c0cf0304b5da",
+      "app_id": "736092a2-78a1-459b-845a-b1c4f3c92ddf",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        }
+      ],
+      "aliases": [
+        "aqua",
+        "priority dispatch",
+        "proqa",
+        "proqa aqua"
+      ]
+    },
+    {
+      "name": "HLP - Chameleon",
+      "sp_id": "7d704c91-a388-45bf-9bc1-9fe57983ca7c",
+      "app_id": "c7843a71-eb57-401e-b493-381e5f8a5b0a",
+      "groups": [
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        },
+        {
+          "id": "b9d1f0e3-c807-4385-a891-e789286fae64",
+          "name": "AS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "animal control",
+        "animal services",
+        "chameleon",
+        "hlp"
+      ]
+    },
+    {
+      "name": "Tyler EERP Database Access",
+      "sp_id": "81877ea7-0dec-401b-adad-23e1ba1f6a5b",
+      "app_id": "76a2852b-9ac2-4a43-8bc0-1cc9f08f69cb",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        },
+        {
+          "id": "32c6911a-bedf-4592-b4ae-cf610c742889",
+          "name": "Russell, Bryce J"
+        }
+      ],
+      "aliases": [
+        "eerp db",
+        "munis",
+        "munis database",
+        "munis db",
+        "tyler munis"
+      ]
+    },
+    {
+      "name": "ESRI ArcSDE",
+      "sp_id": "84fe74ed-ab2d-4030-a50f-2493ad3391e6",
+      "app_id": "2e2ca4a9-e9b0-49bc-87c8-5c1376edf15d",
+      "groups": [
+        {
+          "id": "9613843e-3dcb-4284-a28e-fcabb851892c",
+          "name": "EH-COM"
+        },
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "arcgis",
+        "esri",
+        "gis"
+      ]
+    },
+    {
+      "name": "RaptorMed",
+      "sp_id": "9b9a167c-2551-4720-b167-cc893ca89c6d",
+      "app_id": "3afef137-cdc2-4165-bcc8-5d9e399af4ff",
+      "groups": [
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        },
+        {
+          "id": "12729660-55de-4e2c-b6e0-ea68b8b1d1fb",
+          "name": "PK-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "veterinary"
+      ]
+    },
+    {
+      "name": "Tyler - Tax Bill Search (Test)",
+      "sp_id": "a298e9bd-daba-470a-be00-e779b792ab68",
+      "app_id": "da17459b-b0a1-4e4f-857a-9d4952259c32",
+      "groups": [
+        {
+          "id": "0a9e938b-b9ed-44df-80d2-98dfa6fd5be5",
+          "name": "Intune Tax Bill Search (Test)"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "(test)",
+        "bill",
+        "search",
+        "tax",
+        "tax bill search (test)",
+        "tyler"
+      ]
+    },
+    {
+      "name": "TimeKeeping - Guard1 Plus",
+      "sp_id": "a4b64c07-d77b-48c1-9307-8348e23ada19",
+      "app_id": "8fb8c1a5-e245-4256-9950-9429ea73c2af",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        }
+      ],
+      "aliases": [
+        "guard1",
+        "guard1 plus",
+        "plus",
+        "timekeeping"
+      ]
+    },
+    {
+      "name": "Northwoods - Compass Appointments",
+      "sp_id": "ad4ae0a7-8964-4ea9-b554-1505b97a85a1",
+      "app_id": "e322023f-f878-4002-99b6-14aed733d2d0",
+      "groups": [
+        {
+          "id": "76cab693-f2d0-4fe1-a047-afabf294e0ca",
+          "name": "DS-COM"
+        },
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "appointments",
+        "compass",
+        "compass appointments",
+        "dss",
+        "northwoods"
+      ]
+    },
+    {
+      "name": "Print Server - az01s084",
+      "sp_id": "adb960ca-dddb-4de4-a6cc-c372efe6d4fb",
+      "app_id": "7be72a88-1138-44b1-b08e-7198df6ad46f",
+      "groups": [
+        {
+          "id": "4ee4ce2d-c32b-41d4-a447-c2de9fcd8e4c",
+          "name": "HD-COM"
+        },
+        {
+          "id": "d151b2db-d56a-490a-b003-9578f5b96a45",
+          "name": "TA-COM"
+        },
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "az01s084",
+        "print server"
+      ]
+    },
+    {
+      "name": "VMware vCenter",
+      "sp_id": "befd3bb2-c4bb-47da-a892-b1431e1775a8",
+      "app_id": "941a2be6-1e00-4031-b7cc-1b47c9f95946",
+      "groups": [
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "vmware",
+        "vsphere"
+      ]
+    },
+    {
+      "name": "Carolina Software - WasteWORKS",
+      "sp_id": "cb204982-13cc-4fa6-818a-2496fca5445b",
+      "app_id": "70d86985-9eea-4964-99ad-0eff05e095fe",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        }
+      ],
+      "aliases": [
+        "carolina software",
+        "solid waste",
+        "waste",
+        "wasteworks"
+      ]
+    },
+    {
+      "name": "Netscaler - Citrix Gateway",
+      "sp_id": "cca8f3e8-5274-4cb6-a202-d562412289a6",
+      "app_id": "a2d19678-a474-4609-9ebf-9e7a2dc34515",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        }
+      ],
+      "aliases": [
+        "citrix",
+        "citrix gateway",
+        "gateway",
+        "netscaler",
+        "xendesktop"
+      ]
+    },
+    {
+      "name": "CentralSquare - OneSolution RMS",
+      "sp_id": "d03c4b00-a6f1-4205-ac21-e4584c946aa6",
+      "app_id": "0060836c-fc56-4dbe-9c14-7f092fa45e2b",
+      "groups": [
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        },
+        {
+          "id": "093300db-fed7-4b2f-af10-b1771fc9f690",
+          "name": "SD-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "centralsquare",
+        "onesolution",
+        "onesolution rms",
+        "records management",
+        "rms"
+      ]
+    },
+    {
+      "name": "Northwoods - Compass Pilot",
+      "sp_id": "eda284ac-ff5a-4620-aa5b-9b5334927192",
+      "app_id": "14afa166-3fe8-423b-bd6f-29f5efce5aff",
+      "groups": [
+        {
+          "id": "76cab693-f2d0-4fe1-a047-afabf294e0ca",
+          "name": "DS-COM"
+        },
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "compass",
+        "compass pilot",
+        "dss",
+        "northwoods",
+        "pilot"
+      ]
+    },
+    {
+      "name": "NC Crossroads",
+      "sp_id": "f0db5b4c-5afb-41b9-b6bd-c691414706a0",
+      "app_id": "088e2a76-9833-4bbb-8501-c1f333b8862d",
+      "groups": [
+        {
+          "id": "4ee4ce2d-c32b-41d4-a447-c2de9fcd8e4c",
+          "name": "HD-COM"
+        },
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        }
+      ],
+      "direct_users": [],
+      "aliases": []
+    },
+    {
+      "name": "CentralSquare - Message Switch",
+      "sp_id": "f1edb6d5-d5be-4b99-8b36-1f715df81655",
+      "app_id": "06c04270-bf87-4fa0-90cd-b8d86df43d32",
+      "groups": [],
+      "direct_users": [
+        {
+          "id": "f92cce93-6dc7-43d8-ac41-278f97088eb1",
+          "name": "Cress, Randy J."
+        },
+        {
+          "id": "5590d089-6253-4d0f-a43c-2929fa526980",
+          "name": "Crabtree, Justin D."
+        }
+      ],
+      "aliases": [
+        "centralsquare",
+        "message",
+        "message switch",
+        "switch"
+      ]
+    },
+    {
+      "name": "Active Directory - Domain Controllers",
+      "sp_id": "f8d594a2-8338-48a8-bfd6-2768801364fc",
+      "app_id": "6edfdea4-fe2e-4485-8725-9efc2641e1c7",
+      "groups": [
+        {
+          "id": "d9895822-48fc-4388-b9b0-5716a4e02d5e",
+          "name": "Social Services"
+        },
+        {
+          "id": "4ee4ce2d-c32b-41d4-a447-c2de9fcd8e4c",
+          "name": "HD-COM"
+        },
+        {
+          "id": "d4d92591-651e-44ec-87d7-b969d43cedbe",
+          "name": "RD-COM"
+        },
+        {
+          "id": "9613843e-3dcb-4284-a28e-fcabb851892c",
+          "name": "EH-COM"
+        },
+        {
+          "id": "64972073-ca60-4ff7-a257-d1de309369cd",
+          "name": "IS-COM"
+        },
+        {
+          "id": "b9d1f0e3-c807-4385-a891-e789286fae64",
+          "name": "AS-COM"
+        },
+        {
+          "id": "093300db-fed7-4b2f-af10-b1771fc9f690",
+          "name": "SD-COM"
+        },
+        {
+          "id": "73d8d45b-5177-4809-b966-7b03d2490a5b",
+          "name": "Intune Munis Reports"
+        },
+        {
+          "id": "a2835af1-3451-47dd-960f-f26b50671fa2",
+          "name": "Intune Miscellaneous Reports"
+        },
+        {
+          "id": "0a9e938b-b9ed-44df-80d2-98dfa6fd5be5",
+          "name": "Intune Tax Bill Search (Test)"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "active directory",
+        "ad",
+        "controllers",
+        "dc",
+        "domain",
+        "domain controllers"
+      ]
+    },
+    {
+      "name": "Tyler - EERP Reports Server",
+      "sp_id": "fac95f70-2d1f-4daa-8cd3-491d51d52ff9",
+      "app_id": "4be30e7c-9008-417e-b321-3fd668c8e099",
+      "groups": [
+        {
+          "id": "73d8d45b-5177-4809-b966-7b03d2490a5b",
+          "name": "Intune Munis Reports"
+        }
+      ],
+      "direct_users": [],
+      "aliases": [
+        "eerp",
+        "eerp reports",
+        "eerp reports server",
+        "munis",
+        "munis reports",
+        "reports",
+        "server",
+        "ssrs",
+        "ssrs reports",
+        "tyler",
+        "tyler munis"
+      ]
+    }
+  ]
+}
