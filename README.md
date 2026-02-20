@@ -9,6 +9,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [meraki](bridges/meraki/) | networking | Cisco Meraki Dashboard API -- SD-WAN, wireless, switching, VPN, firewall |
 | [azure](bridges/azure/) | cloud | Azure Resource Manager -- subscriptions, resource groups, VMs, NSGs |
 | [cloudflare](bridges/cloudflare/) | networking | Cloudflare API -- DNS, WAF, Zero Trust, tunnels |
+| [endpoint-central](bridges/endpoint-central/) | endpoint-management | ManageEngine Endpoint Central -- patch management, inventory, software deployment, UEM |
 | [freshservice](bridges/freshservice/) | itsm | Freshservice ITSM -- tickets, CMDB, change management, assets |
 | [microsoft-graph](bridges/microsoft-graph/) | identity | Microsoft Graph API -- Entra ID, Exchange, Intune, Teams, LAPS |
 | [servicedesk-plus](bridges/servicedesk-plus/) | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |

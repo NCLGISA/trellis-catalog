@@ -1,0 +1,47 @@
+# ============================================================================
+# Tendril Bridge Manifest - Endpoint Central
+# ============================================================================
+# ManageEngine Endpoint Central (on-premise) -- patch management, asset and
+# software inventory, software deployment, SoM, and system configuration
+# via REST API v1.4.
+# ============================================================================
+
+name: endpoint-central
+version: "1.0.0"
+description: "ManageEngine Endpoint Central bridge for patch management, inventory, software deployment, and endpoint configuration"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-endpoint-central"
+  timezone: "UTC"
+
+credentials:
+  - name: "Endpoint Central Instance URL"
+    env_var: "EC_INSTANCE_URL"
+    description: "On-premise Endpoint Central server URL (e.g. https://ec.yourdomain.local:8443)"
+    scope: "shared"
+    required: true
+  - name: "Endpoint Central Auth Token"
+    env_var: "EC_AUTH_TOKEN"
+    description: >
+      API authentication token generated from Endpoint Central
+      Admin > Integrations > API Explorer > Authentication.
+      Passed as Authorization header on all requests.
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "urllib3>=2.0.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/ec_check.py"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "endpoint-management"
+  tags: "manageengine, endpoint-central, patch-management, inventory, software-deployment, uem, desktop-central"
