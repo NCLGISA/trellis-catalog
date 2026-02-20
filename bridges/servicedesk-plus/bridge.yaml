@@ -1,0 +1,55 @@
+# ============================================================================
+# Tendril Bridge Manifest - SDP
+# ============================================================================
+# ManageEngine ServiceDesk Plus Cloud -- change management, service requests,
+# problems, solutions, assets, CMDB, and announcements via REST API v3.
+# ============================================================================
+
+name: servicedesk-plus
+version: "2.0"
+description: "ManageEngine ServiceDesk Plus Cloud bridge for change management, service requests, problems, KB, assets, CMDB, and announcements"
+
+deployment:
+  type: container
+  base: "python:3.11-slim"
+  hostname: "sdp-bridge"
+  timezone: "UTC"
+
+credentials:
+  - name: "SDP Cloud Instance URL"
+    env_var: "SDP_INSTANCE_URL"
+    description: "Your ServiceDesk Plus Cloud instance URL, e.g. https://yourorg.sdpondemand.manageengine.com"
+    scope: "shared"
+    required: true
+  - name: "Zoho OAuth Client ID"
+    env_var: "SDP_CLIENT_ID"
+    description: "Zoho OAuth client ID from api.zoho.com app registration"
+    scope: "per-operator"
+    required: true
+  - name: "Zoho OAuth Client Secret"
+    env_var: "SDP_CLIENT_SECRET"
+    description: "Zoho OAuth client secret"
+    scope: "per-operator"
+    required: true
+  - name: "Zoho OAuth Refresh Token"
+    env_var: "SDP_REFRESH_TOKEN"
+    description: >
+      Zoho OAuth refresh token with scopes:
+      SDPOnDemand.changes.ALL, SDPOnDemand.requests.ALL,
+      SDPOnDemand.problems.ALL, SDPOnDemand.setup.READ
+    scope: "per-operator"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 -c \"import requests; print('ok')\""
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "itsm"
+  tags: "manageengine, servicedesk, sdp, itsm, changes, requests, problems, cmdb, assets"
