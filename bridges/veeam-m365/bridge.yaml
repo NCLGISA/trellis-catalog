@@ -1,0 +1,44 @@
+# ============================================================================
+# Tendril Bridge Manifest -- Veeam Backup for Microsoft 365
+# ============================================================================
+# Host-based bridge for managing Veeam Backup for M365 backup jobs, restore
+# operations, organization inventory, and health monitoring.
+#
+# Validate:  trellis validate veeam-m365
+# Package:   trellis package veeam-m365
+# Deploy:    trellis deploy veeam-m365 --target <agent-name>
+# ============================================================================
+
+name: veeam-m365
+version: "2026.02.21.3"
+description: "Veeam Backup for Microsoft 365 v13 -- backup job management, granular Exchange/SharePoint/Teams/OneDrive restore, organization inventory, license monitoring, and session diagnostics via 220 VBO PowerShell cmdlets"
+license: Apache-2.0
+
+deployment:
+  type: host
+  target_platform: windows
+  target_hint: "Windows Server running Veeam Backup for Microsoft 365 v13+ with the Veeam.Archiver.PowerShell module installed"
+  requires:
+    - powershell
+
+credentials:
+  - name: "Windows Integrated Auth"
+    env_var: N/A
+    description: >
+      Uses Windows Integrated Authentication via Tendril SYSTEM context.
+      No API keys required. The Tendril agent runs on the VBO server with
+      local access to the Veeam.Archiver.Service and PostgreSQL database.
+      The Veeam.Archiver.PowerShell module connects to the local service
+      automatically.
+    scope: "shared"
+    required: false
+
+metadata:
+  author: "tendril-project"
+  category: "backup"
+  tags: "veeam, m365, backup, exchange, sharepoint, onedrive, teams, restore, microsoft-365"
+  platform_url: "https://www.veeam.com/backup-microsoft-office-365.html"
+  changelog: |
+    2026.02.21.3 - Add restore-onedrive-file and restore-sharepoint-file actions with VEOD/VESP cmdlet chains, multi-file restore support on all restore actions (wildcard -Job pattern + -Count limit), fix Resolve-VETPath to pass -Channel on subfolder navigation (Get-VETFile requires both -Channel and -ParentFile), detect versioned filenames from Save-VETItem output
+    2026.02.21.2 - Fix explore-teams/explore-sharepoint broken cmdlet chains (add Get-VETOrganization/Get-VESPOrganization intermediate step), add browse-channel-files, search-teams-files, restore-teams-file actions with -Path parameter for file-level Teams restore, fix VETChannel/VETFile property names, update SKILL.md with correct VET/VESP workflows and troubleshooting
+    2026.02.21.1 - Initial host bridge with admin script covering status, jobs, sessions, session-log, license, repos, org-stats, users, groups, sites, teams, protection-report, storage-report, start-job, stop-job, enable-job, disable-job, restore-points, explore-exchange, explore-sharepoint, explore-teams
