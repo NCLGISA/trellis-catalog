@@ -1,0 +1,25 @@
+# ============================================================================
+# Tendril Bridge - Adobe Sign - Docker Compose
+# ============================================================================
+# Generated from bridge.yaml -- regenerate with: trellis build adobe-sign
+# ============================================================================
+
+services:
+  bridge-adobe-sign:
+    build: .
+    image: bridge-adobe-sign:latest
+    hostname: bridge-adobe-sign
+    environment:
+      - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
+      - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL}
+      - ADOBE_SIGN_INTEGRATION_KEY=${ADOBE_SIGN_INTEGRATION_KEY}
+      - BRIDGE_SEED_VERSION=${BRIDGE_SEED_VERSION:-1}
+      - TZ=America/New_York
+    volumes:
+      - tendril-agent:/opt/tendril
+      - bridge-data:/opt/bridge/data
+    restart: unless-stopped
+
+volumes:
+  tendril-agent:
+  bridge-data:

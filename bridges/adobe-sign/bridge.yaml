@@ -1,0 +1,63 @@
+# ============================================================================
+# Tendril Bridge Manifest -- Adobe Sign
+# ============================================================================
+# Single source of truth for building and deploying this bridge.
+# Dockerfile, docker-compose.yml, entrypoint.sh, and .env.example are
+# generated automatically by `trellis build adobe-sign`.
+#
+# Validate:  trellis validate adobe-sign
+# Build:     trellis build adobe-sign
+# Deploy:    trellis deploy adobe-sign
+# ============================================================================
+
+name: adobe-sign
+version: "2026.02.20.2"
+description: "Adobe Acrobat Sign e-signature bridge -- agreements, templates, web forms, users, webhooks, document content extraction (with OCR), and audit trails via REST API v6"
+license: Apache-2.0
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-adobe-sign"
+  timezone: "UTC"
+
+credentials:
+  - name: "Integration Key"
+    env_var: "ADOBE_SIGN_INTEGRATION_KEY"
+    description: >
+      Adobe Sign Integration Key (permanent access token). Generate from
+      Adobe Sign > Account > Access Tokens > Create Integration Key.
+      Enable all scopes required by this bridge: account_read, user_read,
+      agreement_read, agreement_write, agreement_send, widget_read,
+      library_read, workflow_read, webhook_read, webhook_write.
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+    - "pdfminer.six>=20231228"
+    - "pymupdf>=1.24.0"
+    - "pytesseract>=0.3.10"
+    - "Pillow>=10.0.0"
+  system:
+    - tesseract-ocr
+    - tesseract-ocr-eng
+    - poppler-utils
+    - libmagic1
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/adobe_sign_check.py"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "collaboration"
+  tags: "adobe, acrobat-sign, echosign, e-signature, agreements, documents, workflows, ocr, pdf"
+  platform_url: "https://www.adobe.com/sign.html"
+  documentation: "https://developer.adobe.com/document-services/docs/overview/acrobat-sign-api/"
+  changelog: |
+    2026.02.20.2 - Added document content extraction with hybrid text/OCR pipeline, webhook and widget CLI tools, expanded test battery
+    2026.02.20.1 - Initial bridge with agreements, templates, users, health check, and test battery
