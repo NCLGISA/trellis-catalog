@@ -34,6 +34,65 @@ from adobe_sign_client import AdobeSignClient
 
 MIN_TEXT_THRESHOLD = 50  # chars per page before OCR fallback triggers
 
+_UNICODE_NORMALIZE_MAP = str.maketrans({
+    "\u2011": "-",   # non-breaking hyphen
+    "\u2013": "-",   # en-dash
+    "\u2014": "-",   # em-dash
+    "\u2018": "'",   # left single quote
+    "\u2019": "'",   # right single quote
+    "\u201c": '"',   # left double quote
+    "\u201d": '"',   # right double quote
+    "\u00a0": " ",   # non-breaking space
+    "\u2010": "-",   # hyphen (Unicode)
+    "\u2012": "-",   # figure dash
+    "\u2015": "-",   # horizontal bar
+    "\u2032": "'",   # prime
+    "\u2033": '"',   # double prime
+})
+
+
+def _normalize_text(text: str) -> str:
+    """Replace typographic Unicode variants with ASCII equivalents for searching."""
+    return text.translate(_UNICODE_NORMALIZE_MAP)
+
+
+_SIG_STAMP_PATTERN = re.compile(
+    r"[\x00-\x08\x0b\x0c\x0e-\x1f]"  # control chars embedded in signature font
+)
+
+_SIG_BLOCK_PATTERN = re.compile(
+    r"(?:"
+    r"[A-Za-z\x00-\x1f\u0080-\u04ff]{4,}"  # shifted chars mixed with controls
+    r"[\x00-\x08\x0e-\x1f]"                 # must contain at least one control char
+    r"[A-Za-z\x00-\x1f\u0080-\u04ff]*"
+    r")"
+)
+
+
+def _clean_signature_stamps(text: str) -> str:
+    """Strip garbled Adobe Sign e-signature font-encoded blocks.
+
+    Adobe Sign embeds electronic signatures using a custom font that maps
+    glyphs to shifted codepoints.  pdfminer decodes these as sequences of
+    control characters (U+0003 etc.) interleaved with shifted ASCII.  This
+    function detects those blocks and replaces them with a readable marker.
+    """
+    if not _SIG_STAMP_PATTERN.search(text):
+        return text
+
+    lines = text.split("\n")
+    cleaned = []
+    for line in lines:
+        if _SIG_STAMP_PATTERN.search(line):
+            scrubbed = _SIG_BLOCK_PATTERN.sub("", line)
+            scrubbed = _SIG_STAMP_PATTERN.sub("", scrubbed)
+            scrubbed = re.sub(r"  +", " ", scrubbed).strip()
+            if scrubbed:
+                cleaned.append(scrubbed)
+        else:
+            cleaned.append(line)
+    return "\n".join(cleaned)
+
 
 def _extract_text_pdfminer(pdf_path: str) -> list[dict]:
     """Extract text per page using pdfminer.six. Returns list of {page, text, method}."""
@@ -81,6 +140,7 @@ def _ocr_page(pdf_path: str, page_num: int, dpi: int = 300) -> str:
 def _extract_text_hybrid(pdf_path: str) -> list[dict]:
     """
     Hybrid extraction: try native text first, fall back to OCR for sparse pages.
+    Post-processes all pages to strip garbled Adobe Sign signature stamps.
     """
     pages = _extract_text_pdfminer(pdf_path)
 
@@ -94,6 +154,9 @@ def _extract_text_hybrid(pdf_path: str) -> list[dict]:
                     page_info["char_count"] = len(ocr_text)
             except Exception as e:
                 page_info["ocr_error"] = str(e)
+
+        page_info["text"] = _clean_signature_stamps(page_info["text"])
+        page_info["char_count"] = len(page_info["text"])
 
     return pages
 
@@ -176,23 +239,27 @@ def cmd_search(client, agreement_id, query):
     pdf_path = _download_agreement_pdf(client, agreement_id)
     try:
         pages = _extract_text_hybrid(pdf_path)
-        pattern = re.compile(re.escape(query), re.IGNORECASE)
+        norm_query = _normalize_text(query)
+        pattern = re.compile(re.escape(norm_query), re.IGNORECASE)
         matches = []
         for p in pages:
             for line_num, line in enumerate(p["text"].splitlines(), 1):
-                if pattern.search(line):
+                norm_line = _normalize_text(line)
+                if pattern.search(norm_line):
+                    highlighted = pattern.sub(
+                        lambda x: f">>>{x.group()}<<<", norm_line.strip()
+                    )
                     matches.append({
                         "page": p["page"],
                         "line": line_num,
-                        "text": line.strip(),
+                        "text": highlighted,
                     })
 
         print(f"Search: '{query}' in agreement {agreement_id}")
         print(f"Matches: {len(matches)}")
         print()
         for m in matches:
-            highlighted = pattern.sub(lambda x: f">>>{x.group()}<<<", m["text"])
-            print(f"  Page {m['page']}, Line {m['line']}: {highlighted}")
+            print(f"  Page {m['page']}, Line {m['line']}: {m['text']}")
     finally:
         os.unlink(pdf_path)
 

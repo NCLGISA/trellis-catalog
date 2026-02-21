@@ -355,3 +355,12 @@ Adobe Sign uses cursor-based pagination:
 10. **User search is client-side.** The v6 API does not provide a server-side user search -- the client fetches all users and filters locally.
 11. **Library document sharing modes.** Templates can be `USER`, `GROUP`, or `ACCOUNT` scoped. Only templates matching the Integration Key's access level are visible.
 12. **OCR quality depends on scan quality.** Scanned documents with poor resolution, skewed pages, or handwritten text may produce lower-quality OCR results. The page analysis command (`pages`) shows which extraction method was used per page.
+13. **Signature stamps use custom font encoding.** Adobe Sign embeds electronic signatures using a proprietary font that produces garbled characters when extracted (shifted ASCII mixed with control characters). The document reader automatically strips these artifacts. For reliable signer names and emails, use `agreements.py info <id>` which returns structured JSON from the API.
+14. **PDF text may contain Unicode typographic variants.** Documents often use non-breaking hyphens (U+2011), en-dashes, smart quotes, and non-breaking spaces instead of their ASCII equivalents. The `search` command normalizes these automatically, but raw `text` output preserves original characters. If searching manually, use full words rather than hyphenated abbreviations.
+
+## Performance Notes
+
+- **Run `pages` before `text` on unknown agreements.** The `pages` command classifies each page as born-digital or scanned, letting you estimate extraction time and choose targeted extraction with `--page N`.
+- **Large scanned documents take time.** OCR processes each page at 300 DPI, taking ~3-5 seconds per scanned page. An agreement with 25+ scanned pages may take 2+ minutes for full extraction. Use `--page N` to extract specific pages on large documents.
+- **Avoid concurrent heavy OCR extractions.** The bridge supports 5 concurrent commands, but each OCR extraction consumes significant CPU and memory. Running multiple simultaneously on large documents may degrade performance or trigger upstream timeouts.
+- **Born-digital extraction is fast.** Native text extraction via pdfminer takes sub-second per page regardless of page content density.
