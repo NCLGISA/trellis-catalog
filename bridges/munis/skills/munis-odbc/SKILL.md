@@ -21,22 +21,12 @@ metadata:
     - sql-server
     - reporting
 credentials:
-  - name: MUNIS_DB_HOST
-    description: SQL Server hostname for the Tyler-hosted Munis instance (shared)
-    scope: shared
-    required: true
-  - name: MUNIS_DB_NAME
-    description: Munis database name (shared)
-    scope: shared
-    required: true
-  - name: MUNIS_DB_USER
-    description: Per-operator SQL Server username stored in Tendril Root credential vault
-    scope: per-operator
-    required: true
-  - name: MUNIS_DB_PASSWORD
-    description: Per-operator SQL Server password stored in Tendril Root credential vault
-    scope: per-operator
-    required: true
+  - key: MUNIS_DB_USER
+    env: MUNIS_DB_USER
+    description: Per-operator SQL Server username (from Tyler Deploy > Database Info > Database User)
+  - key: MUNIS_DB_PASSWORD
+    env: MUNIS_DB_PASSWORD
+    description: Per-operator SQL Server password
 ---
 
 # Munis ODBC Bridge
