@@ -1,0 +1,47 @@
+# ============================================================================
+# Tendril Bridge - Sierra AirLink (AirVantage)
+# ============================================================================
+# Manages Sierra Wireless AirLink cellular gateways via the AirVantage API.
+#
+# Credentials:
+#   AIRLINK_CLIENT_ID      - OAuth2 client ID (from AirVantage API client)
+#   AIRLINK_CLIENT_SECRET  - OAuth2 client secret
+#   AIRLINK_REGION         - Datacenter region: na (default) or eu
+#
+# See README.md for API client creation walkthrough.
+# ============================================================================
+
+services:
+  bridge-sierra-airlink:
+    build: .
+    image: bridge-sierra-airlink:latest
+    hostname: bridge-sierra-airlink
+    environment:
+      # === Tendril Agent ===
+      - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
+      - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL}
+
+      # === Container Timezone ===
+      - TZ=America/New_York
+
+      # === Seed Version ===
+      - BRIDGE_SEED_VERSION=1
+
+      # === AirVantage Credentials ===
+      - AIRLINK_CLIENT_ID=${AIRLINK_CLIENT_ID}
+      - AIRLINK_CLIENT_SECRET=${AIRLINK_CLIENT_SECRET}
+      - AIRLINK_REGION=${AIRLINK_REGION:-na}
+
+    volumes:
+      - tendril-agent:/opt/tendril
+      - bridge-data:/opt/bridge/data
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  tendril-agent:
+  bridge-data:

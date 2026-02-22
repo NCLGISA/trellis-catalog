@@ -1,0 +1,67 @@
+# ============================================================================
+# Tendril Bridge Manifest -- Sierra AirLink
+# ============================================================================
+# Single source of truth for building and deploying this bridge.
+# Dockerfile, docker-compose.yml, entrypoint.sh, and .env.example are
+# generated automatically by `trellis build sierra-airlink`.
+#
+# Validate:  trellis validate sierra-airlink
+# Build:     trellis build sierra-airlink
+# Deploy:    trellis deploy sierra-airlink
+# ============================================================================
+
+name: sierra-airlink
+version: "2026.02.22.1"
+description: "Sierra Wireless AirLink cellular gateway bridge -- system inventory, gateway hardware, signal quality, GPS location, cellular stats, firmware versions, alert monitoring, and fleet communication status via the AirVantage REST API"
+license: Apache-2.0
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-sierra-airlink"
+  timezone: "UTC"
+
+credentials:
+  - name: "OAuth2 Client ID"
+    env_var: "AIRLINK_CLIENT_ID"
+    description: >
+      AirVantage OAuth2 Client ID. Create an API Client in the AirVantage
+      portal: Develop > API Clients > New. Select Client Credentials flow.
+    scope: "shared"
+    required: true
+
+  - name: "OAuth2 Client Secret"
+    env_var: "AIRLINK_CLIENT_SECRET"
+    description: >
+      AirVantage OAuth2 Client Secret. Generated alongside the Client ID
+      when creating an API Client in the AirVantage portal.
+    scope: "shared"
+    required: true
+
+  - name: "AirVantage Region"
+    env_var: "AIRLINK_REGION"
+    description: >
+      AirVantage datacenter region. Use 'na' for North America
+      (na.airvantage.net) or 'eu' for Europe (eu.airvantage.net).
+    scope: "shared"
+    required: false
+    default: "na"
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/airlink_check.py --quick"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "iot"
+  tags: "sierra-wireless, airlink, airvantage, cellular, lte, gateways, iot, fleet, mobile-broadband"
+  platform_url: "https://www.sierrawireless.com/products/airlink/"
+  documentation: "https://source.sierrawireless.com/airvantage/almsc/reference/cloud/API/"
+  changelog: |
+    2026.02.22.1 - Initial bridge with system inventory, gateway hardware, signal quality, GPS, cellular stats, firmware, alerts, and health check
