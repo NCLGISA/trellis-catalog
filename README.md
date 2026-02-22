@@ -41,16 +41,9 @@ trellis graft list
 
 This first-party catalog is always available automatically.
 
-### Pre-Built Docker Images
+### Building Bridges
 
-Multi-arch Docker images (`linux/amd64`, `linux/arm64`) are published to GHCR on each release for container bridges:
-
-```bash
-docker pull ghcr.io/nclgisa/bridge-meraki:latest
-docker pull ghcr.io/nclgisa/bridge-meraki:2026.02.20.3
-```
-
-Host bridges (e.g., `veeam-m365`) are deployed via `trellis package` and `trellis deploy --target <agent>` -- no Docker image required.
+Container bridges are built locally by the operator using `trellis build` (or `trellis build --standalone` for environments without a pre-built base image). Host bridges are packaged via `trellis package` and deployed via `trellis deploy --target <agent>`. No pre-built images are distributed -- the catalog provides source definitions only.
 
 ## Contributing
 

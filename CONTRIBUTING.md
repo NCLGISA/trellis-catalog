@@ -128,7 +128,7 @@ Bridge versions use CalVer (`YYYY.MM.DD.MICRO`). When updating an existing bridg
 2. Update the SKILL.md `metadata.version` to match
 3. Describe what changed in the PR description
 
-Release tags on this repository trigger multi-arch Docker image builds for container bridges whose versions changed since the previous tag. Host bridges are distributed as source (no image build). Only repository maintainers create release tags.
+All bridges are distributed as source. Operators build container images locally via `trellis build` (or `--standalone`). Host bridges are packaged via `trellis package`. Only repository maintainers create release tags.
 
 ## Code of Conduct
 
