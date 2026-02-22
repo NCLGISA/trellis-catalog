@@ -1,0 +1,88 @@
+# ============================================================================
+# Tendril Bridge Manifest - Munis
+# ============================================================================
+# Tyler Technologies Munis ERP -- read-only ODBC access to the cloud-hosted
+# SQL Server database for financial reporting, budget analysis, payroll,
+# and ad-hoc queries over site-to-site VPN.
+#
+# Tyler Munis exposes reporting data through table-valued functions in
+# *ReportingServices schemas (not direct dbo table access). Every function
+# requires a @UserName parameter for row-level security based on the
+# operator's Munis application user profile.
+# ============================================================================
+
+name: munis
+version: "1.1.0"
+description: >
+  Tyler Munis ERP ODBC bridge providing read-only access to financial,
+  payroll, HR, and procurement data via Tyler's Reporting Services
+  table-valued functions. Connects to Tyler-hosted SQL Server over
+  site-to-site VPN with per-operator credential isolation and
+  row-level security.
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-munis"
+  timezone: "UTC"
+
+prerequisites:
+  network:
+    - description: "Site-to-site VPN tunnel to Tyler Technologies cloud hosting"
+      protocol: "tcp"
+      port: 1433
+      target: "Tyler-hosted SQL Server (MUNIS_DB_HOST)"
+  sql_server:
+    - role: "MunisReportDesigners"
+      description: "Required SQL database role granting access to *ReportingServices schemas"
+    - requirement: "Munis application user profile with module access"
+      description: "Tyler admin must configure which Munis modules the user can access; the SQL role alone returns 0 rows"
+  tls:
+    - note: "TrustServerCertificate=yes required; Tyler-hosted instances use certificates not in the public CA chain"
+
+credentials:
+  - name: "Munis Database Host"
+    env_var: "MUNIS_DB_HOST"
+    description: >
+      SQL Server hostname for the Tyler-hosted Munis instance. Found in
+      Tyler Deploy (https://tylerdeploy.com) under Site Report > Environment
+      > Munis ERP > Database Info > SQL Instance. Append .tylerhost.net to
+      the SQL Instance value (e.g. abcdefgh01cs02.tylerhost.net).
+    scope: "shared"
+    required: true
+  - name: "Munis Database Name"
+    env_var: "MUNIS_DB_NAME"
+    description: >
+      SQL Server database name. Found in Tyler Deploy under Site Report >
+      Environment > Munis ERP > Database Info > Database User (listed below
+      the SQL Instance). Example: mun1234prod.
+    scope: "shared"
+    required: true
+  - name: "Munis SQL Username"
+    env_var: "MUNIS_DB_USER"
+    description: >
+      Per-operator SQL Server login for Munis. Must be a member of
+      MunisReportDesigners role with an associated Munis application
+      user profile. The login name is passed as @UserName to Tyler's
+      reporting functions for row-level security.
+    scope: "per-operator"
+    required: true
+  - name: "Munis SQL Password"
+    env_var: "MUNIS_DB_PASSWORD"
+    description: "Per-operator SQL Server password corresponding to MUNIS_DB_USER"
+    scope: "per-operator"
+    required: true
+
+dependencies:
+  pip:
+    - "pyodbc>=5.1.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/munis_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "erp"
+  tags: "tyler, munis, erp, finance, budget, payroll, odbc, sql-server, reporting"
