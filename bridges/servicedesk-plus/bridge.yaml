@@ -6,7 +6,7 @@
 # ============================================================================
 
 name: servicedesk-plus
-version: "2.0"
+version: "2026.02.22.1"
 description: "ManageEngine ServiceDesk Plus Cloud bridge for change management, service requests, problems, KB, assets, CMDB, and announcements"
 
 deployment:

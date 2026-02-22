@@ -3,7 +3,7 @@ name: servicedesk-plus
 description: Gateway to ManageEngine ServiceDesk Plus Cloud. Manages changes, requests, problems, solutions, assets, CMDB, and announcements via REST API v3.
 metadata:
   author: tendril-project
-  version: "2.0"
+  version: "2026.02.22.1"
   skill_scope: "bridge"
 credentials:
   - key: client_id

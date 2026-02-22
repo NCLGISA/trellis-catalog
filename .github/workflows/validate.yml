@@ -11,15 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download latest Trellis CLI
-        run: |
-          LATEST=$(gh release view --repo NCLGISA/trellis --json tagName -q .tagName)
-          gh release download "$LATEST" --repo NCLGISA/trellis --pattern "trellis-linux-amd64" --dir .
-          chmod +x trellis-linux-amd64
-          mv trellis-linux-amd64 /usr/local/bin/trellis
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Detect changed bridges
         id: changed
         run: |
@@ -30,21 +21,38 @@ jobs:
           echo "bridges=$BRIDGES" >> "$GITHUB_OUTPUT"
           echo "Changed bridges: $BRIDGES"
 
-      - name: Validate bridge manifests
+      - name: Validate bridge.yaml presence
         run: |
           EXIT=0
           for bridge in ${{ steps.changed.outputs.bridges }}; do
-            echo "--- Validating $bridge ---"
+            echo "--- Checking $bridge ---"
             if [ ! -f "bridges/$bridge/bridge.yaml" ]; then
-              echo "SKIP: no bridge.yaml"
-              continue
+              echo "ERROR: bridges/$bridge/bridge.yaml is missing"
+              EXIT=1
             fi
-            trellis validate "$bridge" --human || EXIT=1
           done
           exit $EXIT
-        working-directory: ${{ github.workspace }}
 
-      - name: Check entrypoint permissions
+      - name: Validate required manifest fields
+        run: |
+          EXIT=0
+          for bridge in ${{ steps.changed.outputs.bridges }}; do
+            MANIFEST="bridges/$bridge/bridge.yaml"
+            [ -f "$MANIFEST" ] || continue
+            for field in name version description; do
+              if ! grep -q "^${field}:" "$MANIFEST"; then
+                echo "ERROR: $MANIFEST missing required field: $field"
+                EXIT=1
+              fi
+            done
+            if ! grep -q "type:" "$MANIFEST"; then
+              echo "ERROR: $MANIFEST missing deployment.type"
+              EXIT=1
+            fi
+          done
+          exit $EXIT
+
+      - name: Check entrypoint permissions (container bridges)
         run: |
           EXIT=0
           for bridge in bridges/*/; do
@@ -73,8 +81,22 @@ jobs:
           EXIT=0
           PATTERNS="rowancountync\.gov|10\.1\.[0-9]|192\.168\.[0-9]|\.internal\.|AKIAIOSFODNN7EXAMPLE"
           for bridge in bridges/*/; do
-            if grep -rEi "$PATTERNS" "$bridge" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.md" --include="*.sh"; then
+            if grep -rEi "$PATTERNS" "$bridge" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.md" --include="*.sh" --include="*.ps1"; then
               echo "ERROR: Organization-specific content found in $bridge"
+              EXIT=1
+            fi
+          done
+          exit $EXIT
+
+      - name: Validate CalVer version format
+        run: |
+          EXIT=0
+          for bridge in ${{ steps.changed.outputs.bridges }}; do
+            MANIFEST="bridges/$bridge/bridge.yaml"
+            [ -f "$MANIFEST" ] || continue
+            VERSION=$(grep '^version:' "$MANIFEST" | head -1 | sed 's/version: *["]*//;s/["]*$//')
+            if ! echo "$VERSION" | grep -qE '^[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]+$'; then
+              echo "ERROR: $bridge version '$VERSION' is not CalVer (YYYY.MM.DD.MICRO)"
               EXIT=1
             fi
           done

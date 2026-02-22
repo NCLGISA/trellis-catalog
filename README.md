@@ -4,46 +4,53 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 
 ## Bridges
 
-| Bridge | Category | Description |
-|--------|----------|-------------|
-| [meraki](bridges/meraki/) | networking | Cisco Meraki Dashboard API -- SD-WAN, wireless, switching, VPN, firewall |
-| [azure](bridges/azure/) | cloud | Azure Resource Manager -- subscriptions, resource groups, VMs, NSGs |
-| [cloudflare](bridges/cloudflare/) | networking | Cloudflare API -- DNS, WAF, Zero Trust, tunnels |
-| [endpoint-central](bridges/endpoint-central/) | endpoint-management | ManageEngine Endpoint Central -- patch management, inventory, software deployment, UEM |
-| [freshservice](bridges/freshservice/) | itsm | Freshservice ITSM -- tickets, CMDB, change management, assets |
-| [microsoft-graph](bridges/microsoft-graph/) | identity | Microsoft Graph API -- Entra ID, Exchange, Intune, Teams, LAPS |
-| [servicedesk-plus](bridges/servicedesk-plus/) | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
-| [zoom](bridges/zoom/) | collaboration | Zoom Server-to-Server OAuth -- meetings, users, phone admin |
+| Bridge | Type | Category | Description |
+|--------|------|----------|-------------|
+| [adobe-sign](bridges/adobe-sign/) | container | document-management | Adobe Acrobat Sign -- e-signatures, agreements, templates, web forms, audit trails |
+| [azure](bridges/azure/) | container | cloud | Azure Resource Manager -- subscriptions, resource groups, VMs, NSGs |
+| [cloudflare](bridges/cloudflare/) | container | networking | Cloudflare API -- DNS, WAF, Zero Trust, tunnels |
+| [endpoint-central](bridges/endpoint-central/) | container | endpoint-management | ManageEngine Endpoint Central -- patch management, inventory, software deployment, UEM |
+| [freshservice](bridges/freshservice/) | container | itsm | Freshservice ITSM -- tickets, CMDB, change management, assets |
+| [meraki](bridges/meraki/) | container | networking | Cisco Meraki Dashboard API -- SD-WAN, wireless, switching, VPN, firewall |
+| [microsoft-graph](bridges/microsoft-graph/) | container | identity | Microsoft Graph API -- Entra ID, Exchange, Intune, Teams, LAPS |
+| [servicedesk-plus](bridges/servicedesk-plus/) | container | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
+| [veeam-m365](bridges/veeam-m365/) | host | backup | Veeam Backup for Microsoft 365 -- backup jobs, granular restore, organization inventory |
+| [zoom](bridges/zoom/) | container | collaboration | Zoom Server-to-Server OAuth -- meetings, users, phone admin |
 
 ## Using These Bridges
 
 ### With Trellis CLI
 
-The Trellis CLI knows about this repository as its built-in first-party origin. Fetch the catalog and browse:
+The Trellis CLI auto-fetches this catalog on first use -- no manual setup required. Browse and initialize:
 
 ```bash
-trellis graft update
 trellis catalog list
 trellis catalog info meraki
-trellis catalog init meraki
+trellis info meraki              # AI-synthesized setup guide from manifest + SKILL.md
+trellis catalog init meraki      # copy to local workspace
 ```
 
-### As a Graft Source
+### Third-Party Catalogs
 
-If the catalog hasn't been fetched yet, or you want to be explicit:
+The `graft` command is for adding catalogs from other organizations or Git-compatible platforms:
 
 ```bash
-trellis graft add NCLGISA/trellis-catalog
+trellis graft add some-org/their-catalog
+trellis graft list
 ```
+
+This first-party catalog is always available automatically.
 
 ### Pre-Built Docker Images
 
-Multi-arch Docker images (`linux/amd64`, `linux/arm64`) are published to GHCR on each release:
+Multi-arch Docker images (`linux/amd64`, `linux/arm64`) are published to GHCR on each release for container bridges:
 
 ```bash
 docker pull ghcr.io/nclgisa/bridge-meraki:latest
 docker pull ghcr.io/nclgisa/bridge-meraki:2026.02.20.3
 ```
+
+Host bridges (e.g., `veeam-m365`) are deployed via `trellis package` and `trellis deploy --target <agent>` -- no Docker image required.
 
 ## Contributing
 

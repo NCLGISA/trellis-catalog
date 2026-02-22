@@ -7,7 +7,7 @@ compatibility:
     min_version: "2026.02.16"
 metadata:
   author: tendril-project
-  version: "1.0.0"
+  version: "2026.02.22.1"
   tendril-bridge: "true"
   skill_scope: "bridge"
   tags:

@@ -33,12 +33,23 @@ jobs:
               | tr '\n' ' ')
           fi
 
-          if [ -z "$BRIDGES" ]; then
-            echo "No bridge changes detected"
+          # Filter to container bridges only (must have a Dockerfile)
+          CONTAINER_BRIDGES=""
+          for b in $BRIDGES; do
+            if [ -f "bridges/$b/Dockerfile" ]; then
+              CONTAINER_BRIDGES="$CONTAINER_BRIDGES $b"
+            else
+              echo "Skipping $b (host bridge, no Dockerfile)"
+            fi
+          done
+          CONTAINER_BRIDGES=$(echo "$CONTAINER_BRIDGES" | xargs)
+
+          if [ -z "$CONTAINER_BRIDGES" ]; then
+            echo "No container bridge changes detected"
             echo "bridges=" >> "$GITHUB_OUTPUT"
           else
-            echo "Changed bridges: $BRIDGES"
-            MATRIX=$(echo "$BRIDGES" | tr ' ' '\n' | grep -v '^$' | jq -Rnc '[inputs]')
+            echo "Container bridges to build: $CONTAINER_BRIDGES"
+            MATRIX=$(echo "$CONTAINER_BRIDGES" | tr ' ' '\n' | grep -v '^$' | jq -Rnc '[inputs]')
             echo "bridges=$MATRIX" >> "$GITHUB_OUTPUT"
           fi
 
