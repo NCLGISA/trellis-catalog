@@ -1,0 +1,64 @@
+# ============================================================================
+# Tendril Bridge Manifest - Microsoft Exchange
+# ============================================================================
+# Exchange Online PowerShell bridge -- quarantine management, message trace,
+# full mailbox delegation, shared mailbox conversion, and transport rules.
+# Uses ExchangeOnlineManagement module with certificate-based authentication.
+# ============================================================================
+
+name: microsoft-exchange
+version: "2026.02.23.1"
+description: "Exchange Online PowerShell bridge for quarantine, message trace, mailbox delegation, shared mailbox conversion, and transport rules"
+
+deployment:
+  type: container
+  base: "mcr.microsoft.com/powershell:7.4-debian-bookworm"
+  hostname: "bridge-microsoft-exchange"
+  timezone: "UTC"
+
+credentials:
+  - name: "Exchange Online Tenant ID"
+    env_var: "EXO_TENANT_ID"
+    description: "Entra ID tenant ID (GUID) for the Microsoft 365 tenant"
+    scope: "shared"
+    required: true
+  - name: "Exchange Online App ID"
+    env_var: "EXO_APP_ID"
+    description: >
+      App registration client ID with Exchange.ManageAsApp permission and
+      Exchange Administrator directory role. See the SKILL.md Setup section
+      for step-by-step app registration instructions.
+    scope: "shared"
+    required: true
+  - name: "Exchange Online Certificate Thumbprint"
+    env_var: "EXO_CERT_THUMBPRINT"
+    description: >
+      SHA1 thumbprint of the self-signed certificate uploaded to the app
+      registration and mounted as a .pfx file at /opt/bridge/certs/
+    scope: "shared"
+    required: true
+  - name: "Exchange Online Organization"
+    env_var: "EXO_ORGANIZATION"
+    description: "Tenant onmicrosoft.com domain (e.g., contoso.onmicrosoft.com)"
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+  system:
+    - "python3"
+    - "python3-pip"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/exchange_check.py"
+  interval: "120s"
+  timeout: "30s"
+
+metadata:
+  author: "tendril-project"
+  category: "identity"
+  tags: "microsoft, exchange-online, quarantine, message-trace, mailbox-delegation, shared-mailbox, transport-rules, eop"
+  platform_url: "https://outlook.office365.com"
+  documentation: "https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2"
