@@ -1,0 +1,155 @@
+"""
+Exchange Online Bridge Battery Test
+
+Comprehensive read-only test battery to validate certificate authentication,
+module connectivity, and all Exchange Online PowerShell cmdlet categories.
+
+Usage:
+    python3 exchange_bridge_tests.py           # Run full battery
+    python3 exchange_bridge_tests.py --json    # JSON output
+"""
+
+import sys
+import json
+import time
+from datetime import datetime, timedelta
+
+sys.path.insert(0, "/opt/bridge/data/tools")
+from exchange_client import ExchangeClient
+
+
+def run_tests(client: ExchangeClient, as_json: bool = False):
+    """Run the full battery test."""
+    results = []
+    start_time = time.time()
+
+    def test(name: str, category: str, fn):
+        t0 = time.time()
+        try:
+            result = fn()
+            elapsed = int((time.time() - t0) * 1000)
+            ok = result.get("ok", False) if isinstance(result, dict) else bool(result)
+            detail = ""
+            if isinstance(result, dict):
+                if result.get("data") and isinstance(result["data"], list):
+                    detail = f"{len(result['data'])} items"
+                elif result.get("error"):
+                    detail = result["error"][:60]
+                elif result.get("organization"):
+                    detail = result["organization"]
+            results.append({
+                "test": name,
+                "category": category,
+                "passed": ok,
+                "elapsed_ms": elapsed,
+                "detail": detail,
+            })
+        except Exception as e:
+            elapsed = int((time.time() - t0) * 1000)
+            results.append({
+                "test": name,
+                "category": category,
+                "passed": False,
+                "elapsed_ms": elapsed,
+                "detail": str(e)[:60],
+            })
+
+    # ── Category 1: Connection & Auth ──────────────────────────────────
+    test("Certificate authentication", "Connection",
+         lambda: client.test_connection())
+
+    # ── Category 2: Quarantine ─────────────────────────────────────────
+    start = (datetime.utcnow() - timedelta(days=3)).strftime("%m/%d/%Y")
+    end = datetime.utcnow().strftime("%m/%d/%Y")
+
+    test("Get-QuarantineMessage (3 days)", "Quarantine",
+         lambda: client.run_cmdlet("Get-QuarantineMessage", {
+             "StartReceivedDate": start,
+             "EndReceivedDate": end,
+             "PageSize": "10",
+         }))
+
+    # ── Category 3: Message Trace ──────────────────────────────────────
+    test("Get-MessageTrace (2 days, org-wide sample)", "Mail Flow",
+         lambda: client.run_cmdlet("Get-MessageTrace", {
+             "StartDate": start,
+             "EndDate": end,
+             "PageSize": "5",
+         }))
+
+    # ── Category 4: Transport Rules ───────────────────────────────────
+    test("Get-TransportRule", "Mail Flow",
+         lambda: client.run_cmdlet("Get-TransportRule"))
+
+    # ── Category 5: Organization Config ───────────────────────────────
+    test("Get-OrganizationConfig", "Organization",
+         lambda: client.run_cmdlet("Get-OrganizationConfig"))
+
+    # ── Category 6: Mailbox Permissions ───────────────────────────────
+    test("Get-Mailbox (top 1, verify access)", "Mailbox",
+         lambda: client.run_cmdlet("Get-Mailbox", {
+             "ResultSize": "1",
+         }))
+
+    # ── Category 7: Accepted Domains ──────────────────────────────────
+    test("Get-AcceptedDomain", "Organization",
+         lambda: client.run_cmdlet("Get-AcceptedDomain"))
+
+    # ── Category 8: Remote Domains ────────────────────────────────────
+    test("Get-RemoteDomain", "Organization",
+         lambda: client.run_cmdlet("Get-RemoteDomain"))
+
+    # ── Category 9: Anti-Spam / EOP ───────────────────────────────────
+    test("Get-HostedContentFilterPolicy", "EOP",
+         lambda: client.run_cmdlet("Get-HostedContentFilterPolicy"))
+
+    test("Get-MalwareFilterPolicy", "EOP",
+         lambda: client.run_cmdlet("Get-MalwareFilterPolicy"))
+
+    # ── Results ───────────────────────────────────────────────────────
+    total_time = int((time.time() - start_time) * 1000)
+    passed = sum(1 for r in results if r["passed"])
+    failed = sum(1 for r in results if not r["passed"])
+
+    if as_json:
+        print(json.dumps({
+            "total": len(results),
+            "passed": passed,
+            "failed": failed,
+            "elapsed_ms": total_time,
+            "tests": results,
+        }, indent=2))
+        return
+
+    print(f"Exchange Online Bridge Battery Test")
+    print(f"=" * 70)
+    print(f"Date: {datetime.now().isoformat()[:19]}")
+    print(f"Tests: {len(results)} ({passed} passed, {failed} failed)")
+    print(f"Duration: {total_time}ms")
+    print()
+
+    current_category = ""
+    for r in results:
+        if r["category"] != current_category:
+            current_category = r["category"]
+            print(f"\n── {current_category} ──")
+
+        icon = "PASS" if r["passed"] else "FAIL"
+        detail = f" ({r['detail']})" if r["detail"] else ""
+        print(f"  [{icon}] {r['test']:<45} {r['elapsed_ms']:>5}ms{detail}")
+
+    print(f"\n{'=' * 70}")
+    if failed == 0:
+        print(f"All {passed} tests passed in {total_time}ms")
+    else:
+        print(f"{failed} test(s) FAILED out of {len(results)}")
+
+
+def main():
+    as_json = "--json" in sys.argv
+    client = ExchangeClient()
+    run_tests(client, as_json=as_json)
+
+
+if __name__ == "__main__":
+    main()

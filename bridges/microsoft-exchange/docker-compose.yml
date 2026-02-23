@@ -1,0 +1,40 @@
+# ============================================================================
+# Tendril Bridge - Microsoft Exchange (Exchange Online PowerShell)
+# ============================================================================
+# Deploy: docker-compose up -d
+# Logs:   docker-compose logs -f
+# Rebuild: docker-compose up -d --build
+#
+# NOTE: This bridge requires a certificate .pfx file mounted at
+# /opt/bridge/certs/. Place the .pfx in a local certs/ directory.
+# See the SKILL.md Setup section for certificate generation instructions.
+# ============================================================================
+
+services:
+  bridge-microsoft-exchange:
+    build: .
+    image: bridge-microsoft-exchange:latest
+    hostname: bridge-microsoft-exchange
+    environment:
+      - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
+      - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL:-https://your-tendril-root/download/tendril?linux-amd64}
+      - EXO_TENANT_ID=${EXO_TENANT_ID}
+      - EXO_APP_ID=${EXO_APP_ID}
+      - EXO_CERT_THUMBPRINT=${EXO_CERT_THUMBPRINT}
+      - EXO_ORGANIZATION=${EXO_ORGANIZATION}
+      - BRIDGE_SEED_VERSION=${BRIDGE_SEED_VERSION:-1}
+      - TZ=${TZ:-UTC}
+    volumes:
+      - tendril-agent:/opt/tendril
+      - bridge-data:/opt/bridge/data
+      - ./certs:/opt/bridge/certs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python3 /opt/bridge/data/tools/exchange_check.py --quick || exit 1"]
+      interval: 120s
+      timeout: 30s
+      retries: 3
+
+volumes:
+  tendril-agent:
+  bridge-data:
