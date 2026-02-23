@@ -16,6 +16,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [microsoft-exchange](bridges/microsoft-exchange/) | container | identity | Exchange Online PowerShell -- quarantine, message trace, mailbox delegation, shared mailbox conversion, transport rules |
 | [microsoft-graph](bridges/microsoft-graph/) | container | identity | Microsoft Graph API -- Entra ID, Exchange, Intune, Teams, LAPS |
 | [microsoft-purview](bridges/microsoft-purview/) | container | identity | Security & Compliance PowerShell -- DLP, retention, sensitivity labels, alerts, eDiscovery |
+| [microsoft-teams-bot](bridges/microsoft-teams-bot/) | container | collaboration | Teams Bot Framework -- real-time messaging, proactive sends, tenant-wide chat/channel reads via Graph API, Cloudflare tunnel |
 | [servicedesk-plus](bridges/servicedesk-plus/) | container | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
 | [veeam-m365](bridges/veeam-m365/) | host | backup | Veeam Backup for Microsoft 365 -- backup jobs, granular restore, organization inventory |
 | [zoom](bridges/zoom/) | container | collaboration | Zoom Server-to-Server OAuth -- meetings, users, phone admin |
