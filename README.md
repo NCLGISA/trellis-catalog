@@ -8,6 +8,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 |--------|------|----------|-------------|
 | [adobe-sign](bridges/adobe-sign/) | container | document-management | Adobe Acrobat Sign -- e-signatures, agreements, templates, web forms, audit trails |
 | [azure](bridges/azure/) | container | cloud | Azure Resource Manager -- subscriptions, resource groups, VMs, NSGs |
+| [beyondtrust-rs](bridges/beyondtrust-rs/) | container | remote-support | BeyondTrust Remote Support -- appliance health, representative management, session lifecycle, Jump Items, reporting, Vault, configuration backup |
 | [cloudflare](bridges/cloudflare/) | container | networking | Cloudflare API -- DNS, WAF, Zero Trust, tunnels |
 | [endpoint-central](bridges/endpoint-central/) | container | endpoint-management | ManageEngine Endpoint Central -- patch management, inventory, software deployment, UEM |
 | [freshservice](bridges/freshservice/) | container | itsm | Freshservice ITSM -- tickets, CMDB, change management, assets |

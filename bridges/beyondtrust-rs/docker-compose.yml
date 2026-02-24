@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  bridge-beyondtrust-rs:
+    build:
+      context: .
+      network: host
+    image: bridge-beyondtrust-rs:latest
+    container_name: bridge-beyondtrust-rs
+    hostname: bridge-beyondtrust-rs
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - beyondtrust-rs-tendril:/opt/tendril
+      - beyondtrust-rs-data:/opt/bridge/data
+    environment:
+      - TZ=UTC
+      - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
+      - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL:-https://tendril.currituckcountync.gov/download/tendril?linux-amd64}
+
+volumes:
+  beyondtrust-rs-tendril:
+  beyondtrust-rs-data:
