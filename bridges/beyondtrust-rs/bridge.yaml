@@ -1,0 +1,55 @@
+# ============================================================================
+# Tendril Bridge Manifest - BeyondTrust Remote Support
+# ============================================================================
+# BeyondTrust Remote Support -- appliance health, representative status,
+# support teams, session management, session reporting, Jump Item inventory,
+# and configuration via Command, Reporting, and Configuration REST/XML APIs.
+# ============================================================================
+
+name: beyondtrust-rs
+version: "2026.02.24.1"
+description: "BeyondTrust Remote Support bridge for appliance health, representative status, session management, Jump Items, reporting, and configuration"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-beyondtrust-rs"
+  timezone: "UTC"
+
+credentials:
+  - name: "BeyondTrust Site Hostname"
+    env_var: "BT_API_HOST"
+    description: >
+      The public hostname of your BeyondTrust B Series Appliance
+      (e.g., support.example.com). Do NOT include https:// prefix.
+    scope: "shared"
+    required: true
+  - name: "BeyondTrust OAuth2 Client ID"
+    env_var: "BT_CLIENT_ID"
+    description: >
+      OAuth2 client ID from /login > Management > API Configuration.
+      Create an API account with appropriate permissions (Command API,
+      Reporting API, Configuration API as needed).
+    scope: "shared"
+    required: true
+  - name: "BeyondTrust OAuth2 Client Secret"
+    env_var: "BT_CLIENT_SECRET"
+    description: >
+      OAuth2 client secret paired with the Client ID above.
+      Regenerating the secret in /login invalidates all existing tokens.
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/bt_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "remote-support"
+  tags: "beyondtrust, remote-support, bomgar, jump-items, session-management, appliance-health, reporting"
