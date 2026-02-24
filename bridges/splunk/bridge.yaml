@@ -1,0 +1,56 @@
+# ============================================================================
+# Tendril Bridge Manifest - Splunk
+# ============================================================================
+# Splunk Cloud / Splunk Enterprise -- ad-hoc SPL searches, saved searches,
+# fired alerts, index inventory, and server health via the Splunk REST API
+# (port 8089).
+# ============================================================================
+
+name: splunk
+version: "2026.02.24.2"
+description: "Splunk bridge for log search, saved searches, alerts, index inventory, and server health (Cloud and Enterprise)"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-splunk"
+  timezone: "UTC"
+
+credentials:
+  - name: "Splunk URL"
+    env_var: "SPLUNK_URL"
+    description: >
+      Splunk search head management URL including port.
+      Cloud: https://yourorg.splunkcloud.com:8089
+      On-prem: https://splunk.internal:8089
+    scope: "shared"
+    required: true
+  - name: "Splunk Authentication Token"
+    env_var: "SPLUNK_TOKEN"
+    description: >
+      Per-user bearer authentication token created in Splunk Web
+      under Settings > Tokens. The token inherits the creating
+      user's roles and index permissions.
+    scope: "operator"
+    required: true
+  - name: "Verify TLS Certificates"
+    env_var: "SPLUNK_VERIFY_TLS"
+    description: >
+      Set to "false" for on-prem instances using self-signed
+      certificates. Defaults to "true".
+    scope: "shared"
+    required: false
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/splunk_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "siem"
+  tags: "splunk, splunk-cloud, splunk-enterprise, siem, log-search, spl, saved-searches, alerts, indexes"
