@@ -1,0 +1,84 @@
+# ============================================================================
+# Tendril Bridge Manifest - Microsoft Teams Bot
+# ============================================================================
+# Teams Bot Framework bridge -- real-time message receipt via webhook,
+# proactive messaging, tenant-wide chat/channel message reads via Graph API.
+# Supports dual-mode operation: webhook (cloudflared tunnel) or polling.
+#
+# Auth: Entra ID App Registration with client secret (Bot Framework standard)
+# ============================================================================
+
+name: microsoft-teams-bot
+version: "2026.02.23.2"
+description: "Teams Bot Framework bridge for real-time messaging, proactive sends, and tenant-wide chat/channel reads via Graph API"
+
+deployment:
+  type: container
+  base: "python:3.11-slim-bookworm"
+  hostname: "bridge-microsoft-teams-bot"
+  timezone: "UTC"
+
+credentials:
+  - name: "Teams Bot App ID"
+    env_var: "TEAMS_BOT_APP_ID"
+    description: >
+      Entra app registration client ID (single-tenant) with Bot Framework
+      registration and Graph API permissions for message reads.
+    scope: "shared"
+    required: true
+  - name: "Teams Bot App Secret"
+    env_var: "TEAMS_BOT_APP_SECRET"
+    description: >
+      Client secret for the Entra app registration. Required for Bot Framework
+      authentication (standard pattern, not certificate-based).
+    scope: "shared"
+    required: true
+  - name: "Teams Bot Tenant ID"
+    env_var: "TEAMS_BOT_TENANT_ID"
+    description: "Entra ID tenant ID (GUID) for the Microsoft 365 tenant"
+    scope: "shared"
+    required: true
+  - name: "Cloudflare Tunnel Token"
+    env_var: "CLOUDFLARE_TUNNEL_TOKEN"
+    description: >
+      Cloudflare tunnel token for inbound HTTPS webhook. Required when
+      TEAMS_BOT_MODE=webhook (default). Not needed for polling mode.
+    scope: "shared"
+    required: false
+  - name: "Teams Bot Display Name"
+    env_var: "TEAMS_BOT_NAME"
+    description: "Display name shown in Teams conversations (default: Tendril Bot)"
+    scope: "shared"
+    required: false
+  - name: "Teams Bot Mode"
+    env_var: "TEAMS_BOT_MODE"
+    description: >
+      Operating mode: 'webhook' (default) for full Bot Framework with
+      cloudflared tunnel, or 'polling' for Graph API reads only.
+    scope: "shared"
+    required: false
+
+dependencies:
+  pip:
+    - "botbuilder-core>=4.16.0"
+    - "botbuilder-integration-aiohttp>=4.16.0"
+    - "aiohttp>=3.9.0"
+    - "msal>=1.28.0"
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+  system:
+    - "python3"
+    - "python3-pip"
+    - "cloudflared"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/teams_check.py --quick"
+  interval: "120s"
+  timeout: "30s"
+
+metadata:
+  author: "tendril-project"
+  category: "collaboration"
+  tags: "microsoft, teams, bot-framework, chat, channels, proactive-messaging, cloudflare-tunnel"
+  platform_url: "https://teams.microsoft.com"
+  documentation: "https://learn.microsoft.com/en-us/microsoftteams/platform/bots/what-are-bots"

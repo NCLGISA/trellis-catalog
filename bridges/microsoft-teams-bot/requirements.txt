@@ -1,0 +1,6 @@
+botbuilder-core>=4.16.0
+botbuilder-integration-aiohttp>=4.16.0
+aiohttp>=3.9.0
+msal>=1.28.0
+requests>=2.31.0
+python-dotenv>=1.0.0

@@ -1,0 +1,30 @@
+services:
+  bridge-microsoft-teams-bot:
+    build: .
+    image: bridge-microsoft-teams-bot:latest
+    hostname: bridge-microsoft-teams-bot
+    environment:
+      - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
+      - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL:-https://your-tendril-root/download/tendril?linux-amd64}
+      - TEAMS_BOT_APP_ID=${TEAMS_BOT_APP_ID}
+      - TEAMS_BOT_APP_SECRET=${TEAMS_BOT_APP_SECRET}
+      - TEAMS_BOT_TENANT_ID=${TEAMS_BOT_TENANT_ID}
+      - TEAMS_BOT_NAME=${TEAMS_BOT_NAME:-Tendril Bot}
+      - TEAMS_BOT_MODE=${TEAMS_BOT_MODE:-webhook}
+      - TEAMS_BOT_PORT=${TEAMS_BOT_PORT:-3978}
+      - CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+      - BRIDGE_SEED_VERSION=${BRIDGE_SEED_VERSION:-1}
+      - TZ=${TZ:-UTC}
+    volumes:
+      - tendril-agent:/opt/tendril
+      - bridge-data:/opt/bridge/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python3 /opt/bridge/data/tools/teams_check.py --quick || exit 1"]
+      interval: 120s
+      timeout: 30s
+      retries: 3
+
+volumes:
+  tendril-agent:
+  bridge-data:
