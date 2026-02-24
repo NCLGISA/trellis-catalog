@@ -8,7 +8,7 @@ compatibility:
   - tendril-agent
 metadata:
   author: tendril-project
-  version: "2026.02.23.2"
+  version: "2026.02.24.1"
   tendril-bridge: "true"
   skill_scope: bridge
   tags: microsoft, teams, bot-framework, chat, proactive-messaging, cloudflare-tunnel
@@ -215,6 +215,91 @@ the Docker image, creating a secure tunnel without exposing ports.
 
 For operators who cannot use Cloudflare tunnels, **polling mode** provides a
 degraded but functional alternative using Graph API reads only.
+
+## Webhook Endpoint Security
+
+In webhook mode the `/api/messages` endpoint is publicly reachable through the
+Cloudflare tunnel. Only Microsoft Bot Framework servers ever need to reach it.
+Restricting access at the network edge prevents probing and abuse before traffic
+touches the container.
+
+The bot server already validates Bot Framework JWT tokens (application-layer
+defense), but adding edge-level rules provides defense in depth.
+
+### Option A -- ASN + Path + Header (recommended)
+
+Create two Cloudflare WAF / Firewall rules. No IP list maintenance required.
+
+**Rule 1 -- ALLOW legitimate Bot Framework traffic**
+
+```
+Expression (Cloudflare wirefilter):
+  (http.host eq "your-bot-hostname.example.com"
+   and http.request.method eq "POST"
+   and http.request.uri.path eq "/api/messages"
+   and any(http.request.headers["authorization"][*] ne "")
+   and ip.geoip.asnum eq 8075)
+
+Action: allow
+Priority: lower number than the block rule (evaluated first)
+```
+
+**Rule 2 -- BLOCK everything else to the bot hostname**
+
+```
+Expression:
+  (http.host eq "your-bot-hostname.example.com")
+
+Action: block
+Priority: higher number than the allow rule
+```
+
+Together these ensure:
+- Only `POST /api/messages` from Microsoft's network (ASN 8075) with an
+  `Authorization` header reaches the container
+- All other traffic (wrong method, wrong path, missing auth, non-Microsoft
+  origin) is blocked at the Cloudflare edge
+
+ASN 8075 covers Microsoft's entire network, not solely the Bot Service. This is
+acceptable because the bot server still validates the Bot Framework JWT -- an
+attacker on a different Microsoft service would need a valid token to do anything.
+
+### Option B -- AzureBotService IP List (strictest)
+
+For operators who want IP-level precision, replace the ASN check with a
+Cloudflare IP List populated from Microsoft's `AzureBotService` service tag.
+
+1. **Download the current IP ranges** from Microsoft's weekly-updated JSON:
+   `https://www.microsoft.com/en-us/download/details.aspx?id=56519`
+   Filter for the `AzureBotService` service tag (141+ IPv4 CIDRs, 91+ IPv6).
+   A browsable view is at:
+   `https://www.azurespeed.com/Information/AzureIpRanges/AzureBotService`
+
+2. **Create a Cloudflare IP List** via API or dashboard:
+   ```
+   POST /accounts/<account-id>/rules/lists
+   { "name": "AzureBotService", "kind": "ip", "description": "Microsoft Bot Framework IPs" }
+   ```
+   Then bulk-add the CIDRs as list items.
+
+3. **Reference the list** in the ALLOW rule instead of the ASN check:
+   ```
+   ip.src in $AzureBotService
+   ```
+
+4. **Schedule periodic refresh** -- Microsoft publishes updated ranges weekly.
+   Automate a script to diff and update the list, or review quarterly at minimum.
+
+### Defense in Depth Summary
+
+| Layer | What | Blocks |
+|-------|------|--------|
+| **Cloudflare WAF** (edge) | ASN or IP list + path + method + header check | Non-Microsoft traffic, wrong paths, probes |
+| **Bot Framework JWT** (application) | `CloudAdapter` validates token signature and claims | Forged or expired tokens |
+| **Geo-block** (existing WAF rule) | Block non-US traffic to non-public hostnames | International scanning |
+
+All three layers operate independently. Even if one is bypassed, the others
+still protect the endpoint.
 
 ## Tenant-Wide Deployment
 

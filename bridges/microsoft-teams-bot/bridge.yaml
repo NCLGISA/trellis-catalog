@@ -9,7 +9,7 @@
 # ============================================================================
 
 name: microsoft-teams-bot
-version: "2026.02.23.2"
+version: "2026.02.24.1"
 description: "Teams Bot Framework bridge for real-time messaging, proactive sends, and tenant-wide chat/channel reads via Graph API"
 
 deployment:
