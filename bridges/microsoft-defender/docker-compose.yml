@@ -1,0 +1,30 @@
+services:
+  bridge-microsoft-defender:
+    build: .
+    image: bridge-microsoft-defender:latest
+    hostname: bridge-microsoft-defender
+    environment:
+      - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
+      - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL:-https://your-tendril-root/download/tendril?linux-amd64}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - DEFENDER_CLIENT_ID=${DEFENDER_CLIENT_ID}
+      - DEFENDER_CLIENT_SECRET=${DEFENDER_CLIENT_SECRET}
+      - SENTINEL_SUBSCRIPTION_ID=${SENTINEL_SUBSCRIPTION_ID:-}
+      - SENTINEL_RESOURCE_GROUP=${SENTINEL_RESOURCE_GROUP:-}
+      - SENTINEL_WORKSPACE_NAME=${SENTINEL_WORKSPACE_NAME:-}
+      - SENTINEL_WORKSPACE_ID=${SENTINEL_WORKSPACE_ID:-}
+      - BRIDGE_SEED_VERSION=${BRIDGE_SEED_VERSION:-1}
+      - TZ=${TZ:-UTC}
+    volumes:
+      - tendril-agent:/opt/tendril
+      - bridge-data:/opt/bridge/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python3 /opt/bridge/data/tools/defender_check.py --quick || exit 1"]
+      interval: 120s
+      timeout: 30s
+      retries: 3
+
+volumes:
+  tendril-agent:
+  bridge-data:

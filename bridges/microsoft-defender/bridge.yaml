@@ -1,0 +1,81 @@
+# ============================================================================
+# Tendril Bridge Manifest - Microsoft Defender
+# ============================================================================
+# Unified security operations bridge spanning Defender XDR, MDE P2, and
+# Microsoft Sentinel.  Three API surfaces from one container: advanced
+# hunting (KQL across endpoint + SIEM data), incident management, machine
+# actions, vulnerability management, IoC management, Sentinel analytics
+# rules, watchlists, and Log Analytics workspace queries.
+#
+# Auth: Entra ID App Registration with client secret + ARM RBAC
+# ============================================================================
+
+name: microsoft-defender
+version: "2026.02.24.3"
+description: "Unified security bridge for Defender XDR, MDE, and Sentinel -- advanced hunting, incident response, vulnerability management, and SIEM operations"
+
+deployment:
+  type: container
+  base: "python:3.11-slim-bookworm"
+  hostname: "bridge-microsoft-defender"
+  timezone: "UTC"
+
+credentials:
+  - name: "Azure Tenant ID"
+    env_var: "AZURE_TENANT_ID"
+    description: "Entra ID tenant ID for app registration authentication"
+    scope: "shared"
+    required: true
+  - name: "Defender Client ID"
+    env_var: "DEFENDER_CLIENT_ID"
+    description: >
+      App registration client ID with Defender XDR, MDE, and ARM permissions.
+      Single registration covers all three API surfaces.
+    scope: "shared"
+    required: true
+  - name: "Defender Client Secret"
+    env_var: "DEFENDER_CLIENT_SECRET"
+    description: "App registration client secret"
+    scope: "shared"
+    required: true
+  - name: "Sentinel Subscription ID"
+    env_var: "SENTINEL_SUBSCRIPTION_ID"
+    description: "Azure subscription ID containing the Sentinel workspace (optional for MDE-only)"
+    scope: "shared"
+    required: false
+  - name: "Sentinel Resource Group"
+    env_var: "SENTINEL_RESOURCE_GROUP"
+    description: "Resource group containing the Log Analytics / Sentinel workspace"
+    scope: "shared"
+    required: false
+  - name: "Sentinel Workspace Name"
+    env_var: "SENTINEL_WORKSPACE_NAME"
+    description: "Log Analytics workspace name (ARM resource name)"
+    scope: "shared"
+    required: false
+  - name: "Sentinel Workspace ID"
+    env_var: "SENTINEL_WORKSPACE_ID"
+    description: "Log Analytics workspace GUID (for query API)"
+    scope: "shared"
+    required: false
+
+dependencies:
+  pip:
+    - "msal>=1.28.0"
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+  system:
+    - "python3"
+    - "python3-pip"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/defender_check.py --quick"
+  interval: "120s"
+  timeout: "30s"
+
+metadata:
+  author: "tendril-project"
+  category: "security"
+  tags: "microsoft, defender, xdr, mde, sentinel, siem, hunting, incidents, vulnerabilities, ioc"
+  platform_url: "https://security.microsoft.com"
+  documentation: "https://learn.microsoft.com/en-us/defender-xdr/api-overview"
