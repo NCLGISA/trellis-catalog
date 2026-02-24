@@ -117,28 +117,22 @@ class TeamsBotHandler(TeamsActivityHandler):
         lower = text.lower()
         if lower in ("hello", "hi", "hey"):
             await turn_context.send_activity(
-                f"Hello! I'm **{BOT_NAME}**. I'm a Tendril bridge agent "
-                f"connected to your Teams environment."
+                f"Hi, I'm **{BOT_NAME}** -- A bridge for your IT team "
+                f"to send notifications via MS Teams. Type **help** for more info."
             )
         elif lower == "help":
             await turn_context.send_activity(
-                f"**{BOT_NAME}** -- Tendril Teams Bridge\n\n"
-                "I provide connectivity between your Tendril infrastructure "
-                "management platform and Microsoft Teams.\n\n"
-                "Commands I respond to directly:\n"
+                f"**{BOT_NAME}**\n\n"
+                "I deliver notifications and updates from your "
+                "IT team directly to your Teams.\n\n"
+                "Commands:\n"
                 "- **hello** -- greeting\n"
                 "- **help** -- this message\n"
-                "- **status** -- bridge status\n\n"
-                "All other operations are handled through the Tendril agent "
-                "running alongside me."
+                "- **status** -- check if I'm operational\n"
             )
         elif lower == "status":
-            conv_count = self.store.count
             await turn_context.send_activity(
-                f"**{BOT_NAME}** Status\n\n"
-                f"- Mode: webhook\n"
-                f"- Conversations tracked: {conv_count}\n"
-                f"- Channel: {turn_context.activity.channel_id}\n"
+                f"**{BOT_NAME}** is operational."
             )
         else:
             logger.info(
@@ -156,8 +150,8 @@ class TeamsBotHandler(TeamsActivityHandler):
         for member in members_added:
             if member.id != turn_context.activity.recipient.id:
                 await turn_context.send_activity(
-                    f"Hello! I'm **{BOT_NAME}**, a Tendril bridge agent. "
-                    f"Type **help** to see what I can do."
+                    f"Hi, I'm **{BOT_NAME}** -- A bridge for your IT team "
+                    f"to send notifications via MS Teams. Type **help** for more info."
                 )
 
     async def on_conversation_update_activity(self, turn_context: TurnContext):
@@ -174,7 +168,8 @@ class TeamsBotHandler(TeamsActivityHandler):
         if action == "add":
             self._save_conversation_reference(turn_context.activity)
             await turn_context.send_activity(
-                f"**{BOT_NAME}** installed! Type **help** to get started."
+                f"Hi, I'm **{BOT_NAME}** -- A bridge for your IT team "
+                f"to send notifications via MS Teams. Type **help** for more info."
             )
         elif action == "remove":
             key = self._make_key(turn_context.activity)
