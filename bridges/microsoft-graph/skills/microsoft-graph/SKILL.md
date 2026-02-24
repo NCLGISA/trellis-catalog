@@ -74,7 +74,7 @@ Credentials are stored as container environment variables (account-level, not pe
 |--------|----------|---------|
 | `graph_client.py` | `/opt/bridge/data/tools/` | Core REST API client with MSAL auth, pagination, rate limiting. All other tools depend on this. |
 | `graph_check.py` | `/opt/bridge/data/tools/` | Health check: validates env vars and API access |
-| `graph_bridge_tests.py` | `/opt/bridge/data/tools/` | Comprehensive read-only battery test (34 tests across 10 categories) |
+| `graph_bridge_tests.py` | `/opt/bridge/data/tools/` | Comprehensive read-only battery test (36 tests across 10 categories) |
 | `user_lookup.py` | `/opt/bridge/data/tools/` | User search, group membership, sign-in activity |
 | `mailbox_check.py` | `/opt/bridge/data/tools/` | Mailbox diagnostics: settings, forwarding, rules, folders, calendar |
 | `license_check.py` | `/opt/bridge/data/tools/` | License inventory, per-user licenses, assignment/removal |
@@ -471,7 +471,7 @@ Run the comprehensive read-only battery test to verify all 24 permissions and AP
 python3 /opt/bridge/data/tools/graph_bridge_tests.py
 ```
 
-The test covers 34 tests across 10 categories: Bridge Health, Users/Entra ID, Groups, Directory/AD Sync, Security/Audit, Licensing, SharePoint/OneDrive, Intune, Exchange Online, and Copilot Usage.
+The test covers 36 tests across 10 categories: Bridge Health, Users/Entra ID, Groups, Directory/AD Sync, Security/Audit, Licensing, SharePoint/OneDrive, Intune, Exchange Online, and Copilot Usage. Copilot Usage tests include user detail, user count trend, and Reports.Read.All permission verification.
 
 ## API Quirks and Known Issues
 

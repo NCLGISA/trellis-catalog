@@ -632,6 +632,49 @@ def test_copilot_usage_report(client):
     run_test("Copilot Usage", "Copilot usage user detail (D7)", fn)
 
 
+def test_copilot_trend_report(client):
+    def fn():
+        from graph_client import BETA_BASE
+        import csv, io
+        try:
+            resp = client.get(f"{BETA_BASE}/reports/getMicrosoft365CopilotUserCountTrend(period='D7')")
+        except Exception as e:
+            if "403" in str(e) or "Forbidden" in str(e):
+                return "SKIP: Reports.Read.All not granted"
+            raise
+        if resp.status_code == 403:
+            return "SKIP: Reports.Read.All not granted or Copilot not licensed"
+        if resp.status_code == 404:
+            return "SKIP: Copilot trend endpoint not available (no licenses?)"
+        resp.raise_for_status()
+        text = resp.text.strip()
+        if not text:
+            return "0 data points (empty report -- no Copilot licenses?)"
+        rows = list(csv.DictReader(io.StringIO(text.lstrip("\ufeff"))))
+        if not rows:
+            return "0 data points in trend report"
+        date_key = next((k for k in rows[0] if "Date" in k and "Refresh" not in k), None)
+        return f"{len(rows)} data points, date column: {date_key or 'unknown'}"
+    run_test("Copilot Usage", "Copilot user count trend (D7)", fn)
+
+
+def test_reports_permission(client):
+    def fn():
+        from graph_client import BETA_BASE
+        try:
+            resp = client.get(f"{BETA_BASE}/reports/getMicrosoft365CopilotUsageUserDetail(period='D7')")
+        except Exception as e:
+            if "403" in str(e) or "Forbidden" in str(e):
+                return "NOT GRANTED: Reports.Read.All missing from app registration"
+            raise
+        if resp.status_code == 403:
+            return "NOT GRANTED: Reports.Read.All missing from app registration"
+        if resp.status_code in (200, 404):
+            return "GRANTED: Reports.Read.All confirmed"
+        return f"UNKNOWN: HTTP {resp.status_code}"
+    run_test("Copilot Usage", "Reports.Read.All permission check", fn)
+
+
 # ── Main ───────────────────────────────────────────────────────────────
 
 def main():
@@ -691,6 +734,8 @@ def main():
 
     # Category 10: Copilot Usage Reports
     test_copilot_usage_report(client)
+    test_copilot_trend_report(client)
+    test_reports_permission(client)
 
     elapsed = time.time() - start
     print_report(elapsed)

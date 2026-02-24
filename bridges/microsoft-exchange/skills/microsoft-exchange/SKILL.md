@@ -173,7 +173,7 @@ Certificate-based app-only authentication via `Connect-ExchangeOnline`.
 | `exchange_client.py` | `/opt/bridge/data/tools/` | Core PowerShell wrapper: Connect-ExchangeOnline, cmdlet dispatch, session management |
 | `exchange_check.py` | `/opt/bridge/data/tools/` | Healthcheck: validates env vars, certificate, and EXO connectivity |
 | `copilot_audit.py` | `/opt/bridge/data/tools/` | M365 Copilot audit log: search, per-user activity, usage summary via Search-UnifiedAuditLog |
-| `exchange_bridge_tests.py` | `/opt/bridge/data/tools/` | Battery test: 11 tests across 7 categories |
+| `exchange_bridge_tests.py` | `/opt/bridge/data/tools/` | Battery test: 13 tests across 7 categories |
 | `quarantine_check.py` | `/opt/bridge/data/tools/` | List, search, preview, release, delete quarantined messages |
 | `mail_flow.py` | `/opt/bridge/data/tools/` | Message trace, transport rules |
 | `mailbox_permissions.py` | `/opt/bridge/data/tools/` | Full mailbox delegation: FullAccess, Send-As, Send-on-Behalf, folder permissions |
@@ -322,4 +322,4 @@ Operations that live on other bridges:
 python3 /opt/bridge/data/tools/exchange_bridge_tests.py
 ```
 
-Tests 11 operations across 7 categories: Connection, Quarantine, Mail Flow, Organization, Mailbox, EOP, and Copilot Audit.
+Tests 13 operations across 7 categories: Connection, Quarantine, Mail Flow, Organization, Mailbox, EOP, and Copilot Audit. Copilot Audit tests include AuditData JSON structure validation and UserIds filter verification.

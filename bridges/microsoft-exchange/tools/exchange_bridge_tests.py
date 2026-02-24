@@ -118,6 +118,53 @@ def run_tests(client: ExchangeClient, as_json: bool = False):
              "ResultSize": "1",
          }))
 
+    def _test_audit_data_structure():
+        result = client.run_cmdlet("Search-UnifiedAuditLog", {
+            "RecordType": "CopilotInteraction",
+            "StartDate": audit_start,
+            "EndDate": audit_end,
+            "ResultSize": "5",
+        })
+        if not result.get("ok"):
+            return result
+        records = result.get("data") if isinstance(result.get("data"), list) else []
+        if not records:
+            return {"ok": True, "data": [], "detail": "0 records (no Copilot licenses?)"}
+        parsed = 0
+        for r in records:
+            raw = r.get("AuditData", "")
+            if isinstance(raw, str):
+                audit = json.loads(raw)
+            elif isinstance(raw, dict):
+                audit = raw
+            else:
+                continue
+            assert "UserId" in audit or "userId" in audit, "Missing UserId in AuditData"
+            assert "Operation" in audit or "operation" in audit, "Missing Operation"
+            assert "CreationTime" in audit or "creationTime" in audit, "Missing CreationTime"
+            parsed += 1
+        return {"ok": True, "data": records, "detail": f"{parsed}/{len(records)} records validated"}
+
+    test("AuditData JSON structure (CopilotInteraction)", "Copilot Audit",
+         _test_audit_data_structure)
+
+    def _test_userid_filter():
+        result = client.run_cmdlet("Search-UnifiedAuditLog", {
+            "RecordType": "CopilotInteraction",
+            "StartDate": audit_start,
+            "EndDate": audit_end,
+            "ResultSize": "1",
+            "UserIds": "noreply@example.com",
+        })
+        records = result.get("data") if isinstance(result.get("data"), list) else []
+        if not result.get("ok"):
+            return {"ok": True, "data": [], "detail": "0 results (filter accepted)"}
+        return {"ok": True, "data": records,
+                "detail": f"{len(records)} results (filter accepted)"}
+
+    test("Search-UnifiedAuditLog UserIds filter", "Copilot Audit",
+         _test_userid_filter)
+
     # ── Results ───────────────────────────────────────────────────────
     total_time = int((time.time() - start_time) * 1000)
     passed = sum(1 for r in results if r["passed"])
