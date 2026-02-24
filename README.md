@@ -12,11 +12,12 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [endpoint-central](bridges/endpoint-central/) | container | endpoint-management | ManageEngine Endpoint Central -- patch management, inventory, software deployment, UEM |
 | [freshservice](bridges/freshservice/) | container | itsm | Freshservice ITSM -- tickets, CMDB, change management, assets |
 | [meraki](bridges/meraki/) | container | networking | Cisco Meraki Dashboard API -- SD-WAN, wireless, switching, VPN, firewall |
-| [munis](bridges/munis/) | container | erp | Tyler Munis ERP -- read-only ODBC access to financial, payroll, HR, and procurement data via Reporting Services |
+| [microsoft-defender](bridges/microsoft-defender/) | container | security | Defender XDR, MDE P2, and Sentinel -- advanced hunting, incident response, vulnerability management, IoC management, SIEM operations |
 | [microsoft-exchange](bridges/microsoft-exchange/) | container | identity | Exchange Online PowerShell -- quarantine, message trace, mailbox delegation, shared mailbox conversion, transport rules |
 | [microsoft-graph](bridges/microsoft-graph/) | container | identity | Microsoft Graph API -- Entra ID, Exchange, Intune, Teams, LAPS |
 | [microsoft-purview](bridges/microsoft-purview/) | container | identity | Security & Compliance PowerShell -- DLP, retention, sensitivity labels, alerts, eDiscovery |
 | [microsoft-teams-bot](bridges/microsoft-teams-bot/) | container | collaboration | Teams Bot Framework -- real-time messaging, proactive sends, tenant-wide chat/channel reads via Graph API, Cloudflare tunnel |
+| [munis](bridges/munis/) | container | erp | Tyler Munis ERP -- read-only ODBC access to financial, payroll, HR, and procurement data via Reporting Services |
 | [servicedesk-plus](bridges/servicedesk-plus/) | container | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
 | [veeam-m365](bridges/veeam-m365/) | host | backup | Veeam Backup for Microsoft 365 -- backup jobs, granular restore, organization inventory |
 | [zoom](bridges/zoom/) | container | collaboration | Zoom Server-to-Server OAuth -- meetings, users, phone admin |
