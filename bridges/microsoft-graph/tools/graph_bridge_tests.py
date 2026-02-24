@@ -607,6 +607,31 @@ def test_calendar_permissions(client):
     run_test("Exchange Online", "Calendar permissions", fn)
 
 
+# ── Category 10: Copilot Usage Reports ─────────────────────────────────
+
+def test_copilot_usage_report(client):
+    def fn():
+        from graph_client import BETA_BASE
+        try:
+            resp = client.get(f"{BETA_BASE}/reports/getMicrosoft365CopilotUsageUserDetail(period='D7')")
+        except Exception as e:
+            if "403" in str(e) or "Forbidden" in str(e):
+                return "SKIP: Reports.Read.All not granted"
+            raise
+        if resp.status_code == 403:
+            return "SKIP: Reports.Read.All not granted or Copilot not licensed"
+        if resp.status_code == 404:
+            return "SKIP: Copilot report endpoint not available (no licenses?)"
+        resp.raise_for_status()
+        text = resp.text.strip()
+        if not text:
+            return "0 users (empty report -- no Copilot licenses?)"
+        import csv, io
+        rows = list(csv.DictReader(io.StringIO(text.lstrip("\ufeff"))))
+        return f"{len(rows)} users in Copilot usage report"
+    run_test("Copilot Usage", "Copilot usage user detail (D7)", fn)
+
+
 # ── Main ───────────────────────────────────────────────────────────────
 
 def main():
@@ -663,6 +688,9 @@ def main():
     test_mailbox_settings(client)
     test_mail_folders(client)
     test_calendar_permissions(client)
+
+    # Category 10: Copilot Usage Reports
+    test_copilot_usage_report(client)
 
     elapsed = time.time() - start
     print_report(elapsed)

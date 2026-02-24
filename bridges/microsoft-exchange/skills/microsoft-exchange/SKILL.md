@@ -6,7 +6,7 @@ compatibility:
     arch: amd64
 metadata:
   author: tendril-project
-  version: "2026.02.23.1"
+  version: "2026.02.23.2"
   tendril-bridge: "true"
   skill_scope: "bridge"
   tags:
@@ -19,6 +19,8 @@ metadata:
     - shared-mailbox
     - transport-rules
     - eop
+    - copilot
+    - audit-log
 ---
 
 # Microsoft Exchange Bridge
@@ -170,7 +172,8 @@ Certificate-based app-only authentication via `Connect-ExchangeOnline`.
 |--------|----------|---------|
 | `exchange_client.py` | `/opt/bridge/data/tools/` | Core PowerShell wrapper: Connect-ExchangeOnline, cmdlet dispatch, session management |
 | `exchange_check.py` | `/opt/bridge/data/tools/` | Healthcheck: validates env vars, certificate, and EXO connectivity |
-| `exchange_bridge_tests.py` | `/opt/bridge/data/tools/` | Battery test: 10 tests across 6 categories |
+| `copilot_audit.py` | `/opt/bridge/data/tools/` | M365 Copilot audit log: search, per-user activity, usage summary via Search-UnifiedAuditLog |
+| `exchange_bridge_tests.py` | `/opt/bridge/data/tools/` | Battery test: 11 tests across 7 categories |
 | `quarantine_check.py` | `/opt/bridge/data/tools/` | List, search, preview, release, delete quarantined messages |
 | `mail_flow.py` | `/opt/bridge/data/tools/` | Message trace, transport rules |
 | `mailbox_permissions.py` | `/opt/bridge/data/tools/` | Full mailbox delegation: FullAccess, Send-As, Send-on-Behalf, folder permissions |
@@ -244,7 +247,27 @@ python3 mailbox_convert.py clear-forwarding user@example.com              # Remo
 python3 mailbox_convert.py check-forwarding user@example.com              # Check forwarding status
 ```
 
+### copilot_audit.py -- M365 Copilot Audit Log
+
+```bash
+python3 copilot_audit.py recent                          # Last 7 days of Copilot interactions
+python3 copilot_audit.py recent --days 30                # Last 30 days
+python3 copilot_audit.py user user@example.com           # Activity for a specific user
+python3 copilot_audit.py user user@example.com --days 14 # With date range
+python3 copilot_audit.py search --days 7 --user a@b.com  # Flexible search with filters
+python3 copilot_audit.py summary                         # Aggregate stats (7 days)
+python3 copilot_audit.py summary --days 30               # Aggregate stats (30 days)
+```
+
+Uses `Search-UnifiedAuditLog -RecordType CopilotInteraction` to retrieve Copilot AI activity records. Returns zero records (not an error) if no M365 Copilot licenses are assigned in the tenant.
+
 ## Common Patterns
+
+### Copilot Usage Audit
+1. Get a high-level summary: `python3 copilot_audit.py summary --days 30`
+2. Identify active users and apps (Word, Excel, Teams, etc.)
+3. Drill into a specific user: `python3 copilot_audit.py user user@example.com --days 30`
+4. For adoption metrics and trend data, see `bridge-microsoft-graph` -> `copilot_usage.py`
 
 ### Quarantine Investigation
 1. Check quarantine summary: `python3 quarantine_check.py summary`
@@ -277,8 +300,9 @@ Operations that live on other bridges:
 | Read mail content, folder sizes, inbox rules | `bridge-microsoft-graph` | Available via Graph API (`Mail.ReadWrite`) |
 | Calendar permissions, mailbox settings | `bridge-microsoft-graph` | Available via Graph API |
 | User/group management, license assignment | `bridge-microsoft-graph` | Available via Graph API |
-| eDiscovery, content search, DLP, retention | `bridge-microsoft-purview` (planned) | Security & Compliance PowerShell surface |
-| Teams chat/channel messaging | `bridge-microsoft-teams-bot` (planned) | Bot Framework surface |
+| Copilot adoption/usage reports (trend, per-user metrics) | `bridge-microsoft-graph` | Graph beta API (`Reports.Read.All`) |
+| eDiscovery, content search, DLP, retention | `bridge-microsoft-purview` | Security & Compliance PowerShell surface |
+| Teams chat/channel messaging | `bridge-microsoft-teams-bot` | Bot Framework surface |
 
 ## API Quirks and Known Issues
 
@@ -289,6 +313,7 @@ Operations that live on other bridges:
 - **Message trace lag:** Message trace data may have a 5-30 minute delay from the time of message delivery.
 - **Shared mailbox detection:** `RecipientTypeDetails` is the authoritative field for identifying shared mailboxes (`SharedMailbox` vs `UserMailbox`).
 - **Certificate expiry:** Self-signed certificates expire after 1 year. Regenerate and re-upload before expiry. The `setup_exchange_bridge.sh` script automates this.
+- **Copilot audit log:** `Search-UnifiedAuditLog -RecordType CopilotInteraction` returns records only when M365 Copilot licenses are assigned and actively used. Zero records is not an error. Each record's `AuditData` field is a JSON string that must be parsed to extract `AppHost`, `UserId`, and interaction details. Audit data may have a lag of 30-60 minutes.
 - **PowerShell base image:** This bridge uses `mcr.microsoft.com/powershell:7.4-debian-bookworm` instead of `tendril-bridge-base`. The custom Dockerfile is preserved by `trellis build` (it does not contain the `# Generated by trellis` header).
 
 ## Battery Test
@@ -297,4 +322,4 @@ Operations that live on other bridges:
 python3 /opt/bridge/data/tools/exchange_bridge_tests.py
 ```
 
-Tests 10 operations across 6 categories: Connection, Quarantine, Mail Flow, Organization, Mailbox, and EOP.
+Tests 11 operations across 7 categories: Connection, Quarantine, Mail Flow, Organization, Mailbox, EOP, and Copilot Audit.

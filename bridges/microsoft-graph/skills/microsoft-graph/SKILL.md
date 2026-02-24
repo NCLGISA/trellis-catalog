@@ -7,7 +7,7 @@ compatibility:
     min_version: "2026.02.16"
 metadata:
   author: tendril-project
-  version: "2.1.0"
+  version: "2.2.0"
   tendril-bridge: "true"
   tags:
     - microsoft
@@ -22,6 +22,8 @@ metadata:
     - laps
     - conditional-access
     - identity-protection
+    - copilot
+    - usage-reports
 ---
 
 # Microsoft Graph API Bridge
@@ -72,7 +74,7 @@ Credentials are stored as container environment variables (account-level, not pe
 |--------|----------|---------|
 | `graph_client.py` | `/opt/bridge/data/tools/` | Core REST API client with MSAL auth, pagination, rate limiting. All other tools depend on this. |
 | `graph_check.py` | `/opt/bridge/data/tools/` | Health check: validates env vars and API access |
-| `graph_bridge_tests.py` | `/opt/bridge/data/tools/` | Comprehensive read-only battery test (33 tests across 9 categories) |
+| `graph_bridge_tests.py` | `/opt/bridge/data/tools/` | Comprehensive read-only battery test (34 tests across 10 categories) |
 | `user_lookup.py` | `/opt/bridge/data/tools/` | User search, group membership, sign-in activity |
 | `mailbox_check.py` | `/opt/bridge/data/tools/` | Mailbox diagnostics: settings, forwarding, rules, folders, calendar |
 | `license_check.py` | `/opt/bridge/data/tools/` | License inventory, per-user licenses, assignment/removal |
@@ -81,6 +83,7 @@ Credentials are stored as container environment variables (account-level, not pe
 | `teams_check.py` | `/opt/bridge/data/tools/` | Teams inventory, channels, membership |
 | `intune_check.py` | `/opt/bridge/data/tools/` | Extended Intune: device overview, apps, configs, compliance, RBAC, stale/noncompliant |
 | `mailbox_admin.py` | `/opt/bridge/data/tools/` | Shared mailbox delegation, distribution list management, room calendar admin |
+| `copilot_usage.py` | `/opt/bridge/data/tools/` | M365 Copilot adoption and usage reports: per-user activity, daily trend, summary dashboard (beta Graph API) |
 
 ## Quick Start
 
@@ -195,6 +198,20 @@ python3 mailbox_admin.py rooms                                       # List conf
 python3 mailbox_admin.py room-calendar room@example.com       # Room calendar (7 days)
 python3 mailbox_admin.py shared-mailboxes                            # List shared mailboxes
 ```
+
+### copilot_usage.py -- M365 Copilot Adoption Reports
+
+```bash
+python3 copilot_usage.py user-detail                     # Per-user Copilot activity (D30)
+python3 copilot_usage.py user-detail --period D7         # Last 7 days
+python3 copilot_usage.py user-detail --period D90        # Last 90 days
+python3 copilot_usage.py trend                           # Daily active vs enabled users (D30)
+python3 copilot_usage.py trend --period D7               # Last 7 days
+python3 copilot_usage.py summary                         # Adoption dashboard (D30)
+python3 copilot_usage.py summary --period D90            # Last 90 days
+```
+
+Uses the beta Graph API (`/beta/reports/getMicrosoft365Copilot*`) which returns CSV data. Requires `Reports.Read.All` (already granted). Returns empty results (not an error) if no M365 Copilot licenses are assigned. Valid periods: D7, D30, D90, D180.
 
 ### graph_client.py -- CLI Quick Access
 
@@ -370,6 +387,12 @@ client.list_directory_audit_logs(top=20)                     # Directory changes
 
 ## Common Patterns
 
+### Copilot Adoption Reporting
+1. Summary dashboard: `python3 copilot_usage.py summary --period D30`
+2. Per-user activity: `python3 copilot_usage.py user-detail --period D30`
+3. Daily trend: `python3 copilot_usage.py trend --period D30`
+4. For detailed audit log records (who used Copilot in which app, when), see `bridge-microsoft-exchange` -> `copilot_audit.py`
+
 ### Onboarding Workflow
 1. Create user via your identity management tool (on-prem AD, syncs to Entra via Azure AD Connect)
 2. Wait for sync (~30 min) or force sync
@@ -424,6 +447,22 @@ client.list_directory_audit_logs(top=20)                     # Directory changes
 3. Find noncompliant: `python3 intune_check.py noncompliant`
 4. Device detail: `python3 intune_check.py device <name>`
 
+## Cross-Bridge References (Operations NOT on this bridge)
+
+Some Microsoft 365 operations are outside the Graph REST API surface and live on dedicated bridges:
+
+| Operation | Bridge | Why |
+|-----------|--------|-----|
+| Copilot audit log (detailed per-interaction records) | `bridge-microsoft-exchange` | Requires Exchange Online PowerShell (`Search-UnifiedAuditLog -RecordType CopilotInteraction`) |
+| Quarantine management (list, release, delete) | `bridge-microsoft-exchange` | Requires Exchange Online PowerShell (`Get-QuarantineMessage`) |
+| Message trace (delivery tracking) | `bridge-microsoft-exchange` | Requires Exchange Online PowerShell (`Get-MessageTrace`) |
+| Full mailbox delegation (FullAccess, Send-As, Send-on-Behalf) | `bridge-microsoft-exchange` | Graph only exposes calendar permissions, not mailbox-level delegation |
+| Shared mailbox conversion | `bridge-microsoft-exchange` | Requires Exchange Online PowerShell (`Set-Mailbox -Type Shared`) |
+| Transport rules (mail flow rules) | `bridge-microsoft-exchange` | Requires Exchange Online PowerShell |
+| Mailbox forwarding (set/clear) | `bridge-microsoft-exchange` | Graph exposes forwarding settings read-only; full control requires EXO PowerShell |
+| eDiscovery, content search, DLP, retention | `bridge-microsoft-purview` | Requires Security & Compliance PowerShell |
+| Teams chat messages (read/send) | `bridge-microsoft-teams-bot` | Bot Framework webhook + Graph API |
+
 ## Battery Test
 
 Run the comprehensive read-only battery test to verify all 24 permissions and API connectivity:
@@ -432,7 +471,7 @@ Run the comprehensive read-only battery test to verify all 24 permissions and AP
 python3 /opt/bridge/data/tools/graph_bridge_tests.py
 ```
 
-The test covers 33 tests across 9 categories: Bridge Health, Users/Entra ID, Groups, Directory/AD Sync, Security/Audit, Licensing, SharePoint/OneDrive, Intune, and Exchange Online.
+The test covers 34 tests across 10 categories: Bridge Health, Users/Entra ID, Groups, Directory/AD Sync, Security/Audit, Licensing, SharePoint/OneDrive, Intune, Exchange Online, and Copilot Usage.
 
 ## API Quirks and Known Issues
 
@@ -446,5 +485,6 @@ The test covers 33 tests across 9 categories: Bridge Health, Users/Entra ID, Gro
 - **LAPS passwords are base64:** The `passwordBase64` field in LAPS credentials is base64-encoded UTF-8. The `laps_lookup.py` tool decodes automatically. Do NOT display the raw base64 -- always decode first.
 - **Windows 11 detection:** Windows 11 devices show `osVersion` starting with `10.0.2` (build 22000+). Do not filter by "11" in the version string.
 - **Usage reports return CSV:** Endpoints like `getOffice365ActiveUserDetail` return CSV, not JSON. The `get_office365_active_users()` method returns raw text.
+- **Copilot usage reports (beta):** The `getMicrosoft365CopilotUsageUserDetail` and `getMicrosoft365CopilotUserCountTrend` endpoints are beta-only and return CSV. They require `Reports.Read.All` and return empty data if no M365 Copilot licenses are assigned. Column names may change as the API stabilizes.
 - **Permission propagation:** After adding new Graph permissions, allow 5-15 minutes for full propagation across all Microsoft services (Intune, Exchange, Defender).
 - **SharePoint personal sites:** Some SharePoint sites (personal OneDrive sites) may return 403 even with `Sites.ReadWrite.All`. The battery test handles this gracefully.

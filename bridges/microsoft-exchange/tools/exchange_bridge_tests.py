@@ -106,6 +106,18 @@ def run_tests(client: ExchangeClient, as_json: bool = False):
     test("Get-MalwareFilterPolicy", "EOP",
          lambda: client.run_cmdlet("Get-MalwareFilterPolicy"))
 
+    # ── Category 10: Copilot Audit ────────────────────────────────────
+    audit_start = (datetime.utcnow() - timedelta(days=7)).strftime("%m/%d/%Y")
+    audit_end = (datetime.utcnow() + timedelta(days=1)).strftime("%m/%d/%Y")
+
+    test("Search-UnifiedAuditLog (CopilotInteraction)", "Copilot Audit",
+         lambda: client.run_cmdlet("Search-UnifiedAuditLog", {
+             "RecordType": "CopilotInteraction",
+             "StartDate": audit_start,
+             "EndDate": audit_end,
+             "ResultSize": "1",
+         }))
+
     # ── Results ───────────────────────────────────────────────────────
     total_time = int((time.time() - start_time) * 1000)
     passed = sum(1 for r in results if r["passed"])
