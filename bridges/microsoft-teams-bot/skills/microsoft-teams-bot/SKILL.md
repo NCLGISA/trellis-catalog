@@ -8,7 +8,7 @@ compatibility:
   - tendril-agent
 metadata:
   author: tendril-project
-  version: "2026.02.24.1"
+  version: "2026.02.24.3"
   tendril-bridge: "true"
   skill_scope: bridge
   tags: microsoft, teams, bot-framework, chat, proactive-messaging, cloudflare-tunnel
@@ -105,6 +105,7 @@ enables the Teams channel, adds Graph permissions, and grants admin consent.
 | `TEAMS_BOT_TENANT_ID` | Yes | | Entra tenant ID |
 | `TEAMS_BOT_NAME` | No | Tendril Bot | Display name in Teams |
 | `TEAMS_BOT_MODE` | No | webhook | `webhook` or `polling` |
+| `TEAMS_BOT_VERSION` | No | unknown | Version string shown in `status` command |
 | `TEAMS_BOT_PORT` | No | 3978 | aiohttp server port |
 | `CLOUDFLARE_TUNNEL_TOKEN` | webhook | | Cloudflare tunnel token |
 | `TENDRIL_INSTALL_KEY` | Yes | | Tendril agent install key |
@@ -188,14 +189,13 @@ When users message the bot directly in Teams:
 
 | Message | Response |
 |---------|----------|
-| `hello` / `hi` / `hey` | Greeting identifying the bot as an IT notification bridge |
-| `help` | Command list and purpose |
-| `status` | Simple operational confirmation |
-| _(anything else)_ | Silently logged, no response to user |
+| `hello` / `hi` / `hey` | Greeting with bot name |
+| `help` | Command list and description |
+| `status` | Operational status with version number |
+| _(anything else)_ | Fallback: "I didn't understand that. Type help for available commands." |
 
-The bot's user-facing surface is intentionally minimal -- it is primarily a
-notification delivery vehicle controlled by Tendril operators, not an interactive
-chatbot.
+All inbound and outbound messages are logged to `/opt/bridge/data/message_log.jsonl`
+on the persistent Docker volume. This log survives container rebuilds.
 
 ## Cross-Bridge References
 
