@@ -72,12 +72,14 @@ def read_messages(client: TeamsClient, chat_id: str, top: int = 25) -> list[dict
     messages = client.list_chat_messages(chat_id, top=top)
     results = []
     for m in messages:
-        sender = m.get("from", {})
-        user = sender.get("user", {}) if sender else {}
-        body = m.get("body", {})
+        sender = m.get("from") or {}
+        user = sender.get("user") or {}
+        app = sender.get("application") or {}
+        body = m.get("body") or {}
+        name = user.get("displayName") or app.get("displayName") or "system"
         results.append({
             "id": m.get("id"),
-            "from": user.get("displayName", "system"),
+            "from": name,
             "createdDateTime": m.get("createdDateTime"),
             "contentType": body.get("contentType"),
             "content": body.get("content", "")[:500],
@@ -115,13 +117,14 @@ def search_chats(client: TeamsClient, user_ref: str, query: str, top: int = 10) 
             for m in messages:
                 body = m.get("body", {}).get("content", "")
                 if query_lower in body.lower():
-                    sender = m.get("from", {})
-                    user_info = sender.get("user", {}) if sender else {}
+                    sender = m.get("from") or {}
+                    user_info = sender.get("user") or {}
+                    app_info = sender.get("application") or {}
                     hits.append({
                         "chat_id": c["id"],
                         "chat_topic": c.get("topic") or "(no topic)",
                         "message_id": m.get("id"),
-                        "from": user_info.get("displayName", "system"),
+                        "from": user_info.get("displayName") or app_info.get("displayName") or "system",
                         "createdDateTime": m.get("createdDateTime"),
                         "snippet": body[:300],
                     })

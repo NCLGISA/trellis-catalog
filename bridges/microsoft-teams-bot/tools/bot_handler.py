@@ -24,7 +24,11 @@ logger = logging.getLogger("teams-bot")
 CONV_STORE_PATH = os.environ.get(
     "TEAMS_BOT_CONV_STORE", "/opt/bridge/data/conversations.json"
 )
+MSG_LOG_PATH = os.environ.get(
+    "TEAMS_BOT_MSG_LOG", "/opt/bridge/data/message_log.jsonl"
+)
 BOT_NAME = os.environ.get("TEAMS_BOT_NAME", "Tendril Bot")
+BOT_VERSION = os.environ.get("TEAMS_BOT_VERSION", "unknown")
 
 
 class ConversationStore:
@@ -114,34 +118,48 @@ class TeamsBotHandler(TeamsActivityHandler):
         if not text:
             return
 
+        user_name = (
+            turn_context.activity.from_property.name
+            if turn_context.activity.from_property
+            else "unknown"
+        )
+        user_id = (
+            turn_context.activity.from_property.id
+            if turn_context.activity.from_property
+            else None
+        )
+
+        logger.info("Message from %s: %s", user_name, text[:100])
+        self._log_message("in", user_name, user_id, text)
+
         lower = text.lower()
         if lower in ("hello", "hi", "hey"):
-            await turn_context.send_activity(
-                f"Hi, I'm **{BOT_NAME}** -- A bridge for your IT team "
+            reply = (
+                f"Hi, I'm **{BOT_NAME}** -- A bridge for Rowan County IT "
                 f"to send notifications via MS Teams. Type **help** for more info."
             )
+            await turn_context.send_activity(reply)
+            self._log_message("out", BOT_NAME, None, reply)
         elif lower == "help":
-            await turn_context.send_activity(
+            reply = (
                 f"**{BOT_NAME}**\n\n"
-                "I deliver notifications and updates from your "
+                "I deliver notifications and updates from the Rowan County "
                 "IT team directly to your Teams.\n\n"
                 "Commands:\n"
                 "- **hello** -- greeting\n"
                 "- **help** -- this message\n"
                 "- **status** -- check if I'm operational\n"
             )
+            await turn_context.send_activity(reply)
+            self._log_message("out", BOT_NAME, None, reply)
         elif lower == "status":
-            await turn_context.send_activity(
-                f"**{BOT_NAME}** is operational."
-            )
+            reply = f"**{BOT_NAME}** is operational (v{BOT_VERSION})."
+            await turn_context.send_activity(reply)
+            self._log_message("out", BOT_NAME, None, reply)
         else:
-            logger.info(
-                "Message from %s: %s",
-                turn_context.activity.from_property.name
-                if turn_context.activity.from_property
-                else "unknown",
-                text[:100],
-            )
+            reply = "I didn't understand that. Type **help** for available commands."
+            await turn_context.send_activity(reply)
+            self._log_message("out", BOT_NAME, None, reply)
 
     async def on_members_added_activity(
         self, members_added: list[ChannelAccount], turn_context: TurnContext
@@ -150,7 +168,7 @@ class TeamsBotHandler(TeamsActivityHandler):
         for member in members_added:
             if member.id != turn_context.activity.recipient.id:
                 await turn_context.send_activity(
-                    f"Hi, I'm **{BOT_NAME}** -- A bridge for your IT team "
+                    f"Hi, I'm **{BOT_NAME}** -- A bridge for Rowan County IT "
                     f"to send notifications via MS Teams. Type **help** for more info."
                 )
 
@@ -168,7 +186,7 @@ class TeamsBotHandler(TeamsActivityHandler):
         if action == "add":
             self._save_conversation_reference(turn_context.activity)
             await turn_context.send_activity(
-                f"Hi, I'm **{BOT_NAME}** -- A bridge for your IT team "
+                f"Hi, I'm **{BOT_NAME}** -- A bridge for Rowan County IT "
                 f"to send notifications via MS Teams. Type **help** for more info."
             )
         elif action == "remove":
@@ -177,6 +195,21 @@ class TeamsBotHandler(TeamsActivityHandler):
                 del self.store._refs[key]
                 self.store._save()
                 logger.info("Removed conversation reference: %s", key)
+
+    @staticmethod
+    def _log_message(direction: str, user_name: str, user_id: str | None, text: str):
+        try:
+            entry = {
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "dir": direction,
+                "user_name": user_name,
+                "user_id": user_id,
+                "text": text[:500],
+            }
+            with open(MSG_LOG_PATH, "a") as f:
+                f.write(json.dumps(entry) + "\n")
+        except OSError:
+            pass
 
     def _save_conversation_reference(self, activity: Activity):
         ref = TurnContext.get_conversation_reference(activity)
