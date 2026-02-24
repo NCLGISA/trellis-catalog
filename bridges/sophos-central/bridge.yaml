@@ -1,0 +1,49 @@
+# ============================================================================
+# Tendril Bridge Manifest - Sophos Central
+# ============================================================================
+# Sophos Central -- endpoint inventory, security alerts, directory users/groups,
+# policies, allowed/blocked items, scanning exclusions, account health, SIEM
+# event feed, and XDR Data Lake forensic queries via Sophos Central REST APIs.
+# ============================================================================
+
+name: sophos-central
+version: "2026.02.24.1"
+description: "Sophos Central bridge for endpoint security, alert triage, policy management, SIEM events, and XDR forensic analysis"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-sophos"
+  timezone: "UTC"
+
+credentials:
+  - name: "Sophos Central Client ID"
+    env_var: "SOPHOS_CLIENT_ID"
+    description: >
+      OAuth2 client ID from Sophos Central Admin > Global Settings >
+      API Credentials Management. Create a service principal with
+      appropriate role (Super Admin for full access, or Service Principal
+      ReadOnly for read-only).
+    scope: "shared"
+    required: true
+  - name: "Sophos Central Client Secret"
+    env_var: "SOPHOS_CLIENT_SECRET"
+    description: >
+      OAuth2 client secret paired with the Client ID above.
+      Treat as a password -- rotate regularly.
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/sophos_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "security"
+  tags: "sophos, sophos-central, endpoint-protection, xdr, edr, forensics, alerts, threat-detection, isolation"
