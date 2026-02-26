@@ -44,3 +44,9 @@ metadata:
   author: "tendril-project"
   category: "itsm"
   tags: "freshservice, itsm, cmdb, change-management, assets, tickets"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "server-discovery-workflow"
+    description: "Server discovery and CMDB documentation workflow for asset sync"

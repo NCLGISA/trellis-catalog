@@ -65,3 +65,13 @@ metadata:
   documentation: "https://source.sierrawireless.com/airvantage/almsc/reference/cloud/API/"
   changelog: |
     2026.02.22.1 - Initial bridge with system inventory, gateway hardware, signal quality, GPS, cellular stats, firmware, alerts, and health check
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "fleet-correlation"
+    description: "Cross-bridge fleet device correlation across AirLink gateways, Intune, and Meraki"
+  - id: "mct-connectivity"
+    description: "MCT connectivity investigation runbook for cellular gateway troubleshooting"
+  - id: "vlan-network-standard"
+    description: "VLAN layout and subnet assignments for cellular-to-network integration"

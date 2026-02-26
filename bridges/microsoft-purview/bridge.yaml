@@ -64,3 +64,7 @@ metadata:
   tags: "microsoft, purview, dlp, retention, sensitivity-labels, ediscovery, alert-policies, information-barriers, compliance"
   platform_url: "https://compliance.microsoft.com"
   documentation: "https://learn.microsoft.com/en-us/powershell/exchange/connect-to-scc-powershell"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"

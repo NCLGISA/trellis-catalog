@@ -47,3 +47,11 @@ metadata:
   author: "tendril-project"
   category: "identity"
   tags: "microsoft, m365, graph, entra-id, exchange-online, intune, sharepoint, teams, defender, laps"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "fleet-correlation"
+    description: "Cross-bridge fleet device correlation using Intune and Graph data"
+  - id: "server-discovery-workflow"
+    description: "Server discovery workflow leveraging Graph API for infrastructure inventory"

@@ -58,3 +58,11 @@ metadata:
   author: "tendril-project"
   category: "cloud"
   tags: "azure, arm, compute, networking, avd, storage, keyvault, recovery, sql, arc, monitoring"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "server-discovery-workflow"
+    description: "Server discovery and CMDB documentation workflow for infrastructure inventory"
+  - id: "tendril-deploy-runbook"
+    description: "Tendril Root deployment runbook covering Docker and GitHub Actions on Azure VMs"

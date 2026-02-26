@@ -61,3 +61,7 @@ metadata:
   changelog: |
     2026.02.20.2 - Added document content extraction with hybrid text/OCR pipeline, webhook and widget CLI tools, expanded test battery
     2026.02.20.1 - Initial bridge with agreements, templates, users, health check, and test battery
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"

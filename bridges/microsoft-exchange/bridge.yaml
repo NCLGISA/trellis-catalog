@@ -62,3 +62,7 @@ metadata:
   tags: "microsoft, exchange-online, quarantine, message-trace, mailbox-delegation, shared-mailbox, transport-rules, eop"
   platform_url: "https://outlook.office365.com"
   documentation: "https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"

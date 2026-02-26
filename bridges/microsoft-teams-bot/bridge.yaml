@@ -82,3 +82,7 @@ metadata:
   tags: "microsoft, teams, bot-framework, chat, channels, proactive-messaging, cloudflare-tunnel"
   platform_url: "https://teams.microsoft.com"
   documentation: "https://learn.microsoft.com/en-us/microsoftteams/platform/bots/what-are-bots"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"

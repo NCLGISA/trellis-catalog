@@ -86,3 +86,7 @@ metadata:
   author: "tendril-project"
   category: "erp"
   tags: "tyler, munis, erp, finance, budget, payroll, odbc, sql-server, reporting"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"

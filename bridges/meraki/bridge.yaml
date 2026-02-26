@@ -39,3 +39,11 @@ metadata:
   author: "tendril-project"
   category: "networking"
   tags: "cisco, meraki, sdwan, wireless, switches, appliances, firewall, vpn, firmware, clients"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "vlan-network-standard"
+    description: "VLAN layout, subnet assignments, and network segmentation standards"
+  - id: "fleet-correlation"
+    description: "Cross-bridge fleet device correlation across AirLink, Intune, and Meraki"

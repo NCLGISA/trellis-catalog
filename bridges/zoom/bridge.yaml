@@ -46,3 +46,7 @@ metadata:
   author: "tendril-project"
   category: "collaboration"
   tags: "zoom, meetings, phone, recordings, reports, voicemail, call-reporting"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"

@@ -50,3 +50,9 @@ metadata:
   author: "tendril-project"
   category: "networking"
   tags: "cloudflare, dns, tunnels, zero-trust, email, waf, ssl, security"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "vlan-network-standard"
+    description: "VLAN layout and subnet assignments for tunnel-to-origin network context"

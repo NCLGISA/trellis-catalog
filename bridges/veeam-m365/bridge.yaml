@@ -42,3 +42,7 @@ metadata:
     2026.02.21.3 - Add restore-onedrive-file and restore-sharepoint-file actions with VEOD/VESP cmdlet chains, multi-file restore support on all restore actions (wildcard -Job pattern + -Count limit), fix Resolve-VETPath to pass -Channel on subfolder navigation (Get-VETFile requires both -Channel and -ParentFile), detect versioned filenames from Save-VETItem output
     2026.02.21.2 - Fix explore-teams/explore-sharepoint broken cmdlet chains (add Get-VETOrganization/Get-VESPOrganization intermediate step), add browse-channel-files, search-teams-files, restore-teams-file actions with -Path parameter for file-level Teams restore, fix VETChannel/VETFile property names, update SKILL.md with correct VET/VESP workflows and troubleshooting
     2026.02.21.1 - Initial host bridge with admin script covering status, jobs, sessions, session-log, license, repos, org-stats, users, groups, sites, teams, protection-report, storage-report, start-job, stop-job, enable-job, disable-job, restore-points, explore-exchange, explore-sharepoint, explore-teams
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"

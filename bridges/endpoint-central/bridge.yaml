@@ -46,3 +46,9 @@ metadata:
   author: "tendril-project"
   category: "endpoint-management"
   tags: "manageengine, endpoint-central, patch-management, inventory, software-deployment, uem, desktop-central"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "server-discovery-workflow"
+    description: "Server discovery and CMDB documentation workflow for endpoint inventory"

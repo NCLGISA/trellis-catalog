@@ -79,3 +79,9 @@ metadata:
   tags: "microsoft, defender, xdr, mde, sentinel, siem, hunting, incidents, vulnerabilities, ioc"
   platform_url: "https://security.microsoft.com"
   documentation: "https://learn.microsoft.com/en-us/defender-xdr/api-overview"
+
+canopy_references:
+  - id: "organizational-glossary"
+    description: "Org-wide terminology and abbreviation mappings"
+  - id: "bosch-ams-login-investigation"
+    description: "Cross-agent security investigation runbook for physical access control systems"
