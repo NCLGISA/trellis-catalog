@@ -18,6 +18,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [microsoft-purview](bridges/microsoft-purview/) | container | identity | Security & Compliance PowerShell -- DLP, retention, sensitivity labels, alerts, eDiscovery |
 | [microsoft-teams-bot](bridges/microsoft-teams-bot/) | container | collaboration | Teams Bot Framework -- real-time messaging, proactive sends, tenant-wide chat/channel reads via Graph API, Cloudflare tunnel |
 | [munis](bridges/munis/) | container | erp | Tyler Munis ERP -- read-only ODBC access to financial, payroll, HR, and procurement data via Reporting Services |
+| [nextdns](bridges/nextdns/) | container | networking | NextDNS protective DNS -- profile management, security/privacy settings, analytics, query logs, allowlist/denylist |
 | [servicedesk-plus](bridges/servicedesk-plus/) | container | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
 | [sophos-central](bridges/sophos-central/) | container | security | Sophos Central -- endpoint inventory, alerts, isolation, directory, policies, SIEM events, XDR Data Lake forensics |
 | [splunk](bridges/splunk/) | container | siem | Splunk Cloud & Enterprise -- ad-hoc SPL searches, saved searches, fired alerts, index inventory, server health via REST API |

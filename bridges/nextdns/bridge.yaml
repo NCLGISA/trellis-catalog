@@ -1,0 +1,49 @@
+# ============================================================================
+# Tendril Bridge Manifest - NextDNS
+# ============================================================================
+# NextDNS protective DNS -- profile management, security/privacy settings,
+# analytics, query logs, allowlist/denylist, and parental controls via the
+# NextDNS REST API (https://api.nextdns.io).
+# ============================================================================
+
+name: nextdns
+version: "2026.02.26.1"
+description: "NextDNS bridge for DNS profile management, security/privacy settings, analytics, query logs, and allowlist/denylist via the REST API"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-nextdns"
+  timezone: "UTC"
+
+credentials:
+  - name: "NextDNS API Key"
+    env_var: "NEXTDNS_API_KEY"
+    description: >
+      API key from your NextDNS account page (https://my.nextdns.io/account).
+      Passed via the X-Api-Key header on every request. A single key grants
+      access to all profiles owned by the account.
+    scope: "shared"
+    required: true
+  - name: "NextDNS Default Profile"
+    env_var: "NEXTDNS_PROFILE"
+    description: >
+      Default profile ID to operate on (e.g. abc123). Optional -- if unset,
+      profile-scoped commands require an explicit --profile flag. Find IDs
+      in the NextDNS dashboard URL or via the "profiles list" command.
+    scope: "shared"
+    required: false
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/nextdns_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "networking"
+  tags: "nextdns, dns, protective-dns, dns-filtering, security, privacy, parental-controls, analytics, blocklist, allowlist, denylist"
