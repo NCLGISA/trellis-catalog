@@ -11,6 +11,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [cloudflare](bridges/cloudflare/) | container | networking | Cloudflare API -- DNS, WAF, Zero Trust, tunnels |
 | [endpoint-central](bridges/endpoint-central/) | container | endpoint-management | ManageEngine Endpoint Central -- patch management, inventory, software deployment, UEM |
 | [freshservice](bridges/freshservice/) | container | itsm | Freshservice ITSM -- tickets, CMDB, change management, assets |
+| [hycu](bridges/hycu/) | container | backup | HYCU Backup & Recovery -- VM, application, and file share protection, backup jobs, policies, targets, events, restore operations via REST API v1.0 |
 | [meraki](bridges/meraki/) | container | networking | Cisco Meraki Dashboard API -- SD-WAN, wireless, switching, VPN, firewall |
 | [microsoft-defender](bridges/microsoft-defender/) | container | security | Defender XDR, MDE P2, and Sentinel -- advanced hunting, incident response, vulnerability management, IoC management, SIEM operations |
 | [microsoft-exchange](bridges/microsoft-exchange/) | container | identity | Exchange Online PowerShell -- quarantine, message trace, mailbox delegation, shared mailbox conversion, transport rules |
