@@ -1,0 +1,53 @@
+# ============================================================================
+# Tendril Bridge Manifest - HYCU Backup & Recovery
+# ============================================================================
+# HYCU Backup & Recovery -- VM, application, and file share protection with
+# backup job management, policy configuration, target storage, event
+# monitoring, restore operations, and reporting via HYCU REST API v1.0.
+# ============================================================================
+
+name: hycu
+version: "2026.02.26.1"
+description: "HYCU Backup & Recovery bridge for VM/app/share protection, backup jobs, policies, targets, events, restore operations, and reporting"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-hycu"
+  timezone: "UTC"
+
+credentials:
+  - name: "HYCU Server"
+    env_var: "HYCU_SERVER"
+    description: >
+      HYCU controller IP address or hostname.
+    scope: "per-operator"
+    required: true
+  - name: "HYCU API Key"
+    env_var: "HYCU_API_KEY"
+    description: >
+      Per-operator API key generated in the HYCU UI under
+      Administration > API Keys. Create a key and set an
+      appropriate expiration period.
+    scope: "per-operator"
+    required: true
+  - name: "HYCU API Port"
+    env_var: "HYCU_PORT"
+    description: >
+      HYCU REST API port. Defaults to 8443 if not set.
+    scope: "per-operator"
+    required: false
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/hycu_check.py"
+  interval: "60s"
+  timeout: "30s"
+
+metadata:
+  author: "tendril-project"
+  category: "backup"
+  tags: "hycu, backup, recovery, vm-protection, nutanix, disaster-recovery, restore, policies, targets"
