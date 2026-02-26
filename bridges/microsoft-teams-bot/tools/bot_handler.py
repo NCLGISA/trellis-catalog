@@ -28,6 +28,7 @@ MSG_LOG_PATH = os.environ.get(
     "TEAMS_BOT_MSG_LOG", "/opt/bridge/data/message_log.jsonl"
 )
 BOT_NAME = os.environ.get("TEAMS_BOT_NAME", "Tendril Bot")
+ORG_NAME = os.environ.get("TEAMS_BOT_ORG_NAME", "your organization")
 BOT_VERSION = os.environ.get("TEAMS_BOT_VERSION", "unknown")
 
 
@@ -135,7 +136,7 @@ class TeamsBotHandler(TeamsActivityHandler):
         lower = text.lower()
         if lower in ("hello", "hi", "hey"):
             reply = (
-                f"Hi, I'm **{BOT_NAME}** -- A bridge for Rowan County IT "
+                f"Hi, I'm **{BOT_NAME}** -- A bridge for {ORG_NAME} IT "
                 f"to send notifications via MS Teams. Type **help** for more info."
             )
             await turn_context.send_activity(reply)
@@ -143,7 +144,7 @@ class TeamsBotHandler(TeamsActivityHandler):
         elif lower == "help":
             reply = (
                 f"**{BOT_NAME}**\n\n"
-                "I deliver notifications and updates from the Rowan County "
+                f"I deliver notifications and updates from the {ORG_NAME} "
                 "IT team directly to your Teams.\n\n"
                 "Commands:\n"
                 "- **hello** -- greeting\n"
@@ -168,7 +169,7 @@ class TeamsBotHandler(TeamsActivityHandler):
         for member in members_added:
             if member.id != turn_context.activity.recipient.id:
                 await turn_context.send_activity(
-                    f"Hi, I'm **{BOT_NAME}** -- A bridge for Rowan County IT "
+                    f"Hi, I'm **{BOT_NAME}** -- A bridge for {ORG_NAME} IT "
                     f"to send notifications via MS Teams. Type **help** for more info."
                 )
 
@@ -186,7 +187,7 @@ class TeamsBotHandler(TeamsActivityHandler):
         if action == "add":
             self._save_conversation_reference(turn_context.activity)
             await turn_context.send_activity(
-                f"Hi, I'm **{BOT_NAME}** -- A bridge for Rowan County IT "
+                f"Hi, I'm **{BOT_NAME}** -- A bridge for {ORG_NAME} IT "
                 f"to send notifications via MS Teams. Type **help** for more info."
             )
         elif action == "remove":

@@ -146,12 +146,12 @@ def classify_agent(agent: dict, collected_data: dict = None) -> dict:
             "reason": "Azure IMDS metadata present",
         }
 
-    # Example subnet mapping (configure per environment):
-    #   10.10.0.0/16   = Azure Production
-    #   10.20.0.0/16   = Azure Non-Production
-    #   10.30.0.0/16   = Legacy on-premise VMware
-    is_onprem_ip = ip.startswith("10.30.")
-    is_azure_ip = ip.startswith("10.10.") or ip.startswith("10.20.")
+    # Configure subnet mapping per your environment. Example:
+    #   <cloud_subnet>/16    = Cloud VMs (Azure, AWS, GCP)
+    #   <onprem_subnet>/16   = On-premise VMware / Hyper-V
+    # TODO: Replace with your org's subnet ranges
+    is_onprem_ip = False  # e.g., ip.startswith("10.30.")
+    is_azure_ip = False   # e.g., ip.startswith("10.10.") or ip.startswith("10.20.")
 
     # Windows agents without Azure IMDS
     if "windows" in os_version:

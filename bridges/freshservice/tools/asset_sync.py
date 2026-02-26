@@ -433,19 +433,14 @@ def _build_description(data: dict) -> str:
 def _classify_network(ip: str) -> str:
     """Classify IP into a network segment for the Freshservice Network dropdown.
 
-    Example subnet mapping (configure per environment):
-      10.10.10.0/24  = Production servers
-      10.10.14.0/24  = Virtual servers
-      10.10.20.0/16  = Non-production / Azure
+    Configure subnet-to-segment mappings per your environment. Example:
+      10.10.0.0/16  = Production servers
+      10.20.0.0/16  = Cloud VMs
+      10.30.0.0/16  = Legacy on-premise
     """
     if not ip:
         return ""
-    if ip.startswith("10.10.10."):
-        return "SERVERs"
-    if ip.startswith("10.10.14."):
-        return "VSERVERs"
-    if ip.startswith("10.20."):
-        return "SERVERs"
+    # TODO: Replace with your org's subnet-to-segment mapping
     return ""
 
 
@@ -486,21 +481,16 @@ def classify_asset_type(data: dict) -> int:
 
     # IP-subnet fallback (configure per environment):
     #
-    #   10.10.0.0/16   = Azure Production
-    #   10.20.0.0/16   = Azure Non-Production
-    #   10.30.0.0/16   = Legacy on-premise VMware
+    #   <cloud_subnet>/16    = Cloud VMs (Azure, AWS, GCP)
+    #   <onprem_subnet>/16   = On-premise VMware / Hyper-V
     ip = data.get("ip_address", "")
 
-    # Azure subnets: applies to any OS (Linux VMs don't have IMDS in collection)
-    if ip.startswith("10.10.") or ip.startswith("10.20."):
-        return AZURE_VM_TYPE_ID
-
-    # Legacy on-prem VMware subnet: only for Windows machines.
-    # Linux appliances on legacy subnet should be Server, not VMware VM.
-    os_caption = (data.get("os_caption") or "").lower()
-    is_windows = "windows" in os_caption or "server" in os_caption
-    if is_windows and ip.startswith("10.30."):
-        return VMWARE_VM_TYPE_ID
+    # TODO: Replace with your org's subnet ranges for cloud vs on-prem detection
+    # Example:
+    #   if ip.startswith("10.10.") or ip.startswith("10.20."):
+    #       return AZURE_VM_TYPE_ID
+    #   if is_windows and ip.startswith("10.30."):
+    #       return VMWARE_VM_TYPE_ID
 
     return SERVER_TYPE_ID
 

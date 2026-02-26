@@ -231,7 +231,6 @@ def refresh_catalog(client: GraphClient):
         "_meta": {
             "last_refreshed": datetime.now(timezone.utc).isoformat(),
             "app_count": len(apps),
-            "connector_host": "is01s114",
             "ztna_tag": ZTNA_TAG,
         },
         "apps": apps,
@@ -250,7 +249,6 @@ def list_apps(catalog: dict):
 
     print(f"GSA Private Access App Catalog ({len(apps)} apps)")
     print(f"  Last refreshed: {meta.get('last_refreshed', '?')}")
-    print(f"  Connector host: {meta.get('connector_host', '?')}")
     print()
 
     print(f"  {'Application':<45} {'Assignment':<20} {'Groups / Users'}")
