@@ -1,18 +1,18 @@
 # ============================================================================
-# Tendril Bridge Manifest - SDP
+# Tendril Bridge Manifest - ServiceDesk Plus
 # ============================================================================
 # ManageEngine ServiceDesk Plus Cloud -- change management, service requests,
 # problems, solutions, assets, CMDB, and announcements via REST API v3.
 # ============================================================================
 
 name: servicedesk-plus
-version: "2026.02.22.1"
+version: "2026.02.27.1"
 description: "ManageEngine ServiceDesk Plus Cloud bridge for change management, service requests, problems, KB, assets, CMDB, and announcements"
 
 deployment:
   type: container
   base: "python:3.11-slim"
-  hostname: "sdp-bridge"
+  hostname: "bridge-sdp"
   timezone: "UTC"
 
 credentials:
@@ -39,6 +39,11 @@ credentials:
       SDPOnDemand.problems.ALL, SDPOnDemand.setup.READ
     scope: "per-operator"
     required: true
+  - name: "Zoho Accounts URL"
+    env_var: "SDP_ZOHO_URL"
+    description: "Zoho OAuth token endpoint base URL (default: https://accounts.zoho.com). Override for non-US regions (.eu, .in, .com.au)"
+    scope: "shared"
+    required: false
 
 dependencies:
   pip:
@@ -53,9 +58,3 @@ metadata:
   author: "tendril-project"
   category: "itsm"
   tags: "manageengine, servicedesk, sdp, itsm, changes, requests, problems, cmdb, assets"
-
-canopy_references:
-  - id: "organizational-glossary"
-    description: "Org-wide terminology and abbreviation mappings"
-  - id: "server-discovery-workflow"
-    description: "Server discovery and CMDB documentation workflow for asset and configuration tracking"

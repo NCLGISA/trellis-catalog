@@ -18,17 +18,26 @@ import urllib.parse
 
 import requests as http
 
-SDP = os.environ.get("SDP_INSTANCE_URL", "")
-if not SDP:
-    die("SDP_INSTANCE_URL not set. Configure it to your SDP Cloud URL, e.g. https://yourorg.sdpondemand.manageengine.com")
-ZOHO = "https://accounts.zoho.com"
+SDP = os.environ.get("SDP_INSTANCE_URL", "").rstrip("/")
+ZOHO = os.environ.get("SDP_ZOHO_URL", "https://accounts.zoho.com")
 
 
 # ---------------------------------------------------------------------------
 # Shared auth & API helpers
 # ---------------------------------------------------------------------------
 
+def resolve_requester(explicit=None):
+    """Return the requester email: explicit arg > TENDRIL_OPERATOR > None."""
+    if explicit:
+        return explicit
+    op = os.environ.get("TENDRIL_OPERATOR", "")
+    return op if op else None
+
+
 def get_token():
+    if not SDP:
+        die("SDP_INSTANCE_URL not set. Export the full instance URL "
+            "(e.g. https://yourorg.sdpondemand.manageengine.com).")
     cid = os.environ.get("SDP_CLIENT_ID", "")
     secret = os.environ.get("SDP_CLIENT_SECRET", "")
     refresh = os.environ.get("SDP_REFRESH_TOKEN", "")
@@ -126,6 +135,7 @@ def register_changes(sub):
     c.add_argument("--priority", default="5 - Standard")
     c.add_argument("--roll-out-plan")
     c.add_argument("--back-out-plan")
+    c.add_argument("--requester", help="Requester email (defaults to TENDRIL_OPERATOR)")
 
     g = s.add_parser("get")
     g.add_argument("--change-id", required=True)
@@ -156,6 +166,9 @@ def run_changes(args, token):
                   "change_type": {"name": args.change_type}, "risk": {"name": args.risk},
                   "impact": {"name": args.impact}, "urgency": {"name": args.urgency},
                   "priority": {"name": args.priority}}
+        req = resolve_requester(getattr(args, "requester", None))
+        if req:
+            change["change_requester"] = {"email_id": req}
         if args.roll_out_plan:
             change["roll_out_plan"] = {"roll_out_plan_description": args.roll_out_plan}
         if args.back_out_plan:
@@ -227,6 +240,7 @@ def register_requests(sub):
     c.add_argument("--impact", default="3 - Low")
     c.add_argument("--category")
     c.add_argument("--subcategory")
+    c.add_argument("--requester", help="Requester email (defaults to TENDRIL_OPERATOR)")
 
     g = s.add_parser("get")
     g.add_argument("--request-id", required=True)
@@ -257,6 +271,9 @@ def run_requests(args, token):
         req = {"subject": args.subject, "description": args.description,
                "priority": {"name": args.priority}, "urgency": {"name": args.urgency},
                "impact": {"name": args.impact}}
+        requester = resolve_requester(getattr(args, "requester", None))
+        if requester:
+            req["requester"] = {"email_id": requester}
         if args.category: req["category"] = {"name": args.category}
         if args.subcategory: req["subcategory"] = {"name": args.subcategory}
         r = api_post("requests", token, {"request": req})["request"]
@@ -325,6 +342,7 @@ def register_problems(sub):
     c.add_argument("--urgency", default="3 - Low")
     c.add_argument("--impact", default="3 - Low")
     c.add_argument("--status", default="Open")
+    c.add_argument("--requester", help="Reporter email (defaults to TENDRIL_OPERATOR)")
 
     g = s.add_parser("get")
     g.add_argument("--problem-id", required=True)
@@ -357,6 +375,9 @@ def run_problems(args, token):
         prob = {"title": args.title, "description": args.description,
                 "priority": {"name": args.priority}, "urgency": {"name": args.urgency},
                 "impact": {"name": args.impact}, "status": {"name": args.status}}
+        reporter = resolve_requester(getattr(args, "requester", None))
+        if reporter:
+            prob["reporter"] = {"email_id": reporter}
         p = api_post("problems", token, {"problem": prob})["problem"]
         out({"success": True, "problem_id": str(p["id"]), "title": p["title"],
              "status": safe(p, "status", "name"), "url": problem_url(p["id"])})

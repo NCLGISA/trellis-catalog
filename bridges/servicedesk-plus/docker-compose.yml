@@ -1,8 +1,8 @@
 services:
-  sdp-bridge:
+  bridge-sdp:
     build: .
-    container_name: sdp-bridge
-    hostname: sdp-bridge
+    container_name: bridge-sdp
+    hostname: bridge-sdp
     restart: unless-stopped
     volumes:
       - /opt/tendril/tendril:/opt/tendril/tendril:ro
@@ -13,4 +13,3 @@ services:
 networks:
   tendril:
     external: true
-    name: tendril-repo_default

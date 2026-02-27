@@ -3,9 +3,12 @@ name: servicedesk-plus
 description: Gateway to ManageEngine ServiceDesk Plus Cloud. Manages changes, requests, problems, solutions, assets, CMDB, and announcements via REST API v3.
 metadata:
   author: tendril-project
-  version: "2026.02.22.1"
+  version: "2026.02.27.1"
   skill_scope: "bridge"
 credentials:
+  - key: instance_url
+    env: SDP_INSTANCE_URL
+    description: Full SDP Cloud instance URL (e.g. https://yourorg.sdpondemand.manageengine.com)
   - key: client_id
     env: SDP_CLIENT_ID
     description: Zoho OAuth client ID (from api.zoho.com app registration)
@@ -19,22 +22,35 @@ credentials:
 
 # ServiceDesk Plus Cloud Bridge
 
-- **Instance**: Configured via SDP_INSTANCE_URL environment variable
 - **Auth**: Zoho OAuth 2.0 (refresh token flow, auto-refreshed)
 - **API version**: v3
-- **CLI**: `python3 /opt/tendril/scripts/sdp.py <module> <action> [options]`
+- **CLI**: `python3 /opt/bridge/data/tools/sdp.py <module> <action> [options]`
+
+## Setup
+
+Set the SDP instance URL as a shared bridge credential:
+
+```
+bridge_credentials(action="set", bridge="servicedesk-plus", key="instance_url", value="https://yourorg.sdpondemand.manageengine.com")
+```
+
+For non-default Zoho regions (e.g. EU, IN, AU), optionally set:
+
+```
+bridge_credentials(action="set", bridge="servicedesk-plus", key="zoho_url", value="https://accounts.zoho.eu")
+```
 
 ## Modules
 
 ### changes — Change Request Management
 
 ```
-python3 /opt/tendril/scripts/sdp.py changes <action> [options]
+python3 /opt/bridge/data/tools/sdp.py changes <action> [options]
 ```
 
 | Action   | Required Args | Optional Args | Description |
 |----------|--------------|---------------|-------------|
-| create   | --title, --description | --change-type, --risk, --impact, --urgency, --priority, --roll-out-plan, --back-out-plan | Create change request |
+| create   | --title, --description | --change-type, --risk, --impact, --urgency, --priority, --roll-out-plan, --back-out-plan, --requester | Create change request |
 | get      | --change-id | | Get change details and status |
 | update   | --change-id | --description, --stage, --status | Update change fields |
 | close    | --change-id | --description | Move to Completed/Close |
@@ -46,12 +62,12 @@ Defaults: --change-type=Standard, --risk=Medium, --impact="3 - Low", --urgency="
 ### requests — Service Request / Ticket Management
 
 ```
-python3 /opt/tendril/scripts/sdp.py requests <action> [options]
+python3 /opt/bridge/data/tools/sdp.py requests <action> [options]
 ```
 
 | Action   | Required Args | Optional Args | Description |
 |----------|--------------|---------------|-------------|
-| create   | --subject, --description | --priority, --urgency, --impact, --category, --subcategory | Create request |
+| create   | --subject, --description | --priority, --urgency, --impact, --category, --subcategory, --requester | Create request |
 | get      | --request-id | | Get request details |
 | update   | --request-id | --subject, --description, --status, --priority | Update request |
 | add-note | --request-id, --text | --public | Add note to request |
@@ -61,12 +77,12 @@ python3 /opt/tendril/scripts/sdp.py requests <action> [options]
 ### problems — ITIL Problem Management
 
 ```
-python3 /opt/tendril/scripts/sdp.py problems <action> [options]
+python3 /opt/bridge/data/tools/sdp.py problems <action> [options]
 ```
 
 | Action   | Required Args | Optional Args | Description |
 |----------|--------------|---------------|-------------|
-| create   | --title, --description | --priority, --urgency, --impact, --status | Create problem |
+| create   | --title, --description | --priority, --urgency, --impact, --status, --requester | Create problem |
 | get      | --problem-id | | Get problem with root cause/workaround |
 | update   | --problem-id | --title, --description, --status, --priority, --root-cause, --workaround | Update problem |
 | close    | --problem-id | --description | Close problem |
@@ -76,7 +92,7 @@ python3 /opt/tendril/scripts/sdp.py problems <action> [options]
 ### solutions — Knowledge Base
 
 ```
-python3 /opt/tendril/scripts/sdp.py solutions <action> [options]
+python3 /opt/bridge/data/tools/sdp.py solutions <action> [options]
 ```
 
 | Action | Required Args | Optional Args | Description |
@@ -89,7 +105,7 @@ python3 /opt/tendril/scripts/sdp.py solutions <action> [options]
 ### assets — Asset Inventory
 
 ```
-python3 /opt/tendril/scripts/sdp.py assets <action> [options]
+python3 /opt/bridge/data/tools/sdp.py assets <action> [options]
 ```
 
 | Action | Required Args | Optional Args | Description |
@@ -101,7 +117,7 @@ python3 /opt/tendril/scripts/sdp.py assets <action> [options]
 ### cmdb — Configuration Items
 
 ```
-python3 /opt/tendril/scripts/sdp.py cmdb <action> [options]
+python3 /opt/bridge/data/tools/sdp.py cmdb <action> [options]
 ```
 
 | Action | Required Args | Optional Args | Description |
@@ -113,7 +129,7 @@ python3 /opt/tendril/scripts/sdp.py cmdb <action> [options]
 ### announcements — Service Announcements
 
 ```
-python3 /opt/tendril/scripts/sdp.py announcements <action> [options]
+python3 /opt/bridge/data/tools/sdp.py announcements <action> [options]
 ```
 
 | Action | Required Args | Optional Args | Description |
@@ -122,6 +138,13 @@ python3 /opt/tendril/scripts/sdp.py announcements <action> [options]
 | get    | --announcement-id | | Get announcement |
 | list   | | --limit | List recent announcements |
 | delete | --announcement-id | | Delete announcement |
+
+## Requester Auto-Population
+
+All `create` actions accept an optional `--requester` flag to set the requester/reporter email.
+When omitted, the bridge automatically uses the current operator's email from the `TENDRIL_OPERATOR`
+environment variable (injected by Tendril at execution time). This ensures every change, request,
+and problem is attributed to the person who initiated it.
 
 ## SDP Value Reference
 
@@ -145,7 +168,7 @@ python3 /opt/tendril/scripts/sdp.py announcements <action> [options]
 | Active Directory changes | Major | High |
 | DNS zone modifications | Standard | Medium |
 | Firewall/network changes | Major | High |
-| Tendril agent deployment | Minor | Low |
+| Agent deployment | Minor | Low |
 | OS patching / Windows Updates | Standard | Medium |
 | Database schema changes | Major | High |
 | Group Policy changes | Significant | High |
