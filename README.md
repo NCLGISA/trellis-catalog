@@ -23,7 +23,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [servicedesk-plus](bridges/servicedesk-plus/) | container | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
 | [sophos-central](bridges/sophos-central/) | container | security | Sophos Central -- endpoint inventory, alerts, isolation, directory, policies, SIEM events, XDR Data Lake forensics |
 | [splunk](bridges/splunk/) | container | siem | Splunk Cloud & Enterprise -- ad-hoc SPL searches, saved searches, fired alerts, index inventory, server health via REST API |
-| [ukg-ready](bridges/ukg-ready/) | container | hcm | UKG Ready (Kronos) -- employee directory, time & attendance, PTO, payroll, compensation, scheduling, company configuration via REST API |
+| [ukg-ready](bridges/ukg-ready/) | container | hcm | UKG Ready (Kronos) -- employee directory, time & attendance, compensation, notifications, company configuration via REST API |
 | [veeam-m365](bridges/veeam-m365/) | host | backup | Veeam Backup for Microsoft 365 -- backup jobs, granular restore, organization inventory |
 | [zoom](bridges/zoom/) | container | collaboration | Zoom Server-to-Server OAuth -- meetings, users, phone admin |
 
