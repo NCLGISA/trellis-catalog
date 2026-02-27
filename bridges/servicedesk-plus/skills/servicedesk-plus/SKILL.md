@@ -146,6 +146,25 @@ When omitted, the bridge automatically uses the current operator's email from th
 environment variable (injected by Tendril at execution time). This ensures every change, request,
 and problem is attributed to the person who initiated it.
 
+## Change Management Policy & Approvals
+
+Before creating a change request, check Canopy for the organization's change management
+policy document. It contains:
+
+- **Change classification** — how to determine Minor / Standard / Significant / Major
+- **Approval matrix** — which approvers are required at each level for each change type
+- **Approver email directory** — email addresses for programmatic SDP approval level creation
+- **Division mapping** — which systems belong to which division (determines the approving manager)
+- **Process flow** — submit, classify, approve, schedule, execute, document & close
+
+Use `canopy(action="list", tags=["change-management", "sdp"])` to find the relevant document,
+then `canopy(action="read", id="<doc-id>")` to retrieve the full policy. The document will
+specify which SDP approval levels to create and which approvers to assign based on the
+change type and affected division.
+
+If no change management policy is found in Canopy, create the change without approval levels
+and inform the operator that approvals should be managed manually in SDP.
+
 ## SDP Value Reference
 
 **Change Types:** Standard, Minor, Major, Significant
