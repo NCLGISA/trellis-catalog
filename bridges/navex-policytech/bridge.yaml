@@ -6,7 +6,7 @@
 # ============================================================================
 
 name: navex-policytech
-version: "2026.02.27.1"
+version: "2026.02.27.2"
 description: "NAVEX PolicyTech bridge for searching and retrieving published policy and procedure documents"
 
 deployment:

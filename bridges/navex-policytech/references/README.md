@@ -4,6 +4,10 @@
 
 Before deploying this bridge, you must enable the API Keys add-on and create an API key in your NAVEX PolicyTech instance.
 
+> **Plan requirement:** The API Keys add-on is only available on the PolicyTech **Professional** plan. If you are on a lower-tier plan, the option will not appear in IT Settings even after contacting NAVEX Support.
+
+> **Unofficial use:** NAVEX officially supports the OpenSearch API only for SharePoint integration scenarios. Using it for other purposes (such as this bridge) is technically functional but not officially supported by NAVEX -- your mileage may vary.
+
 ## Step 1: Determine Your Base URL
 
 Your NAVEX One base URL follows the pattern:
@@ -18,13 +22,15 @@ Set this as `POLICYTECH_BASE_URL` in your `.env` file (no trailing slash).
 
 ## Step 2: Enable the API Keys Add-on
 
-The OpenSearch API requires the "API Keys" add-on to be activated. This is included with your PolicyTech license but must be turned on by NAVEX Support.
+The OpenSearch API requires the "API Keys" add-on to be activated. This is available on the **Professional** plan and must be turned on by NAVEX Support.
 
 1. Contact NAVEX Support:
    - **Phone:** 888-359-8123
    - **Portal:** https://support.navex.com/s/contactsupport
 2. Request: "Please enable the API Keys add-on for our PolicyTech instance"
 3. They will provide a **registration code**
+
+If the API Keys option does not appear after enablement, confirm that your PolicyTech license is on the Professional plan.
 
 ## Step 3: Enter the Registration Code
 
@@ -88,7 +94,7 @@ The API key is invalid, expired, or the API Keys add-on is not enabled. Verify t
 
 ### "API Keys" menu not visible
 
-The add-on hasn't been enabled yet. Contact NAVEX Support (Step 2).
+Either the add-on hasn't been enabled by NAVEX Support (Step 2), or your PolicyTech license is not on the Professional plan. Contact NAVEX Support to confirm your plan level and request enablement.
 
 ### Empty search results
 
@@ -118,6 +124,8 @@ GET {base_url}/content/api/opensearch/2014/06/?MethodName=GetDocuments
 ```
 
 The response is RSS or Atom XML containing matching published documents with title, description, link, publication date, and optionally a download URL for attached files.
+
+> **Note:** NAVEX officially documents this API for SharePoint integration only. The endpoint behavior, response format, and availability may change without notice in future PolicyTech releases.
 
 For full API documentation, see the PolicyTech help files:
 https://helpfiles.policytech.com/en/18-5-0-0/HelpCenter/Content/IT_Stgs/API_Keys.htm

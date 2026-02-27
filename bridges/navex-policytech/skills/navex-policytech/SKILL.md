@@ -7,7 +7,7 @@ compatibility:
     min_version: "2026.02.24"
 metadata:
   author: tendril-project
-  version: "2026.02.27.1"
+  version: "2026.02.27.2"
   tendril-bridge: "true"
   skill_scope: "bridge"
   tags:
@@ -28,7 +28,7 @@ credentials:
   - key: POLICYTECH_API_KEY
     env: POLICYTECH_API_KEY
     scope: shared
-    description: "API key from Settings & Tools > IT Settings > API Keys"
+    description: "API key from Settings & Tools > IT Settings > API Keys (requires Professional plan)"
   - key: POLICYTECH_VERIFY_TLS
     env: POLICYTECH_VERIFY_TLS
     scope: shared
@@ -39,20 +39,25 @@ credentials:
 
 Search and retrieve published policy and procedure documents from NAVEX PolicyTech (part of NAVEX One) via the OpenSearch API.
 
+> **Plan requirement:** The API Keys add-on requires the PolicyTech **Professional** plan.
+
+> **Unofficial use:** NAVEX officially supports this API only for SharePoint integration. Using it for general-purpose document search (as this bridge does) is functional but not officially supported -- your mileage may vary.
+
 ## Authentication
 
 - **Type:** API key passed as a URL parameter
 - **Key source:** PolicyTech admin panel: Settings & Tools > IT Settings > API Keys
-- **Prerequisite:** The "API Keys" add-on must be enabled by NAVEX Support
+- **Prerequisite:** The "API Keys" add-on must be enabled by NAVEX Support (Professional plan required)
 - **Environment:** `POLICYTECH_BASE_URL` (shared) + `POLICYTECH_API_KEY` (shared) + `POLICYTECH_VERIFY_TLS` (shared, optional)
 - **Scope:** API key can access documents with "All Users" or "Public" security level in "Published" status only
 
 ## Deployment Prerequisites
 
-1. **Contact NAVEX Support** (888-359-8123 or https://support.navex.com/s/contactsupport) to enable the API Keys add-on (included in license, just needs activation)
-2. **Enter the registration code** they provide in NAVEX One: Settings & Tools > IT Settings > Registration Info
-3. **Create an API key** in Settings & Tools > IT Settings > API Keys
-4. **Determine the base URL** -- for NAVEX One this is `https://yourorg.navexone.com`
+1. **Confirm Professional plan** -- the API Keys add-on is only available on PolicyTech Professional
+2. **Contact NAVEX Support** (888-359-8123 or https://support.navex.com/s/contactsupport) to enable the API Keys add-on and obtain a registration code
+3. **Enter the registration code** in NAVEX One: Settings & Tools > IT Settings > Registration Info
+4. **Create an API key** in Settings & Tools > IT Settings > API Keys
+5. **Determine the base URL** -- for NAVEX One this is `https://yourorg.navexone.com`
 
 ## API Limitations
 
@@ -61,6 +66,7 @@ Search and retrieve published policy and procedure documents from NAVEX PolicyTe
 - **Security-filtered** -- only documents with "All Users" or "Public" security level
 - **XML responses** -- the API returns RSS/Atom XML (the client handles parsing)
 - **No individual document retrieval** -- you search by keyword; individual documents are accessed via the `link` URL in results
+- **Unofficially supported** -- NAVEX documents this API for SharePoint integration only; behavior may change without notice
 
 ## Quick Start
 
@@ -155,6 +161,7 @@ Documents returned from search have this structure:
 |---------|-------|-----|
 | HTTP 500 "Policy Manager Error" | Invalid or expired API key | Verify API key in Settings & Tools > IT Settings > API Keys |
 | HTTP 404 | API Keys add-on not enabled | Contact NAVEX Support to enable it |
+| "API Keys" not in IT Settings | Not on Professional plan, or add-on not enabled | Confirm plan level with NAVEX Support |
 | Connection timeout | Network/firewall issue | Ensure the bridge host can reach `*.navexone.com` on port 443 |
 | Empty results | Search terms too specific, or all documents have restricted security levels | Try a broader search; verify document security levels in PolicyTech |
 | SSL certificate error | Proxy or inspection device intercepting TLS | Set `POLICYTECH_VERIFY_TLS=false` |
