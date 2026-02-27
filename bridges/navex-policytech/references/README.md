@@ -8,6 +8,8 @@ Before deploying this bridge, you must enable the API Keys add-on and create an 
 
 > **Unofficial use:** NAVEX officially supports the OpenSearch API only for SharePoint integration scenarios. Using it for other purposes (such as this bridge) is technically functional but not officially supported by NAVEX -- your mileage may vary.
 
+> **Search-only:** This bridge can find documents by keyword and return their titles and links, but it **cannot retrieve document content**. Document links require SSO/browser authentication to view. The API key authorizes search requests only. Think of it as a policy directory, not a policy reader.
+
 ## Step 1: Determine Your Base URL
 
 Your NAVEX One base URL follows the pattern:
@@ -96,6 +98,10 @@ The API key is invalid, expired, or the API Keys add-on is not enabled. Verify t
 
 Either the add-on hasn't been enabled by NAVEX Support (Step 2), or your PolicyTech license is not on the Professional plan. Contact NAVEX Support to confirm your plan level and request enablement.
 
+### Document links prompt for login
+
+This is expected. The API key authorizes search requests only -- it does not grant access to view document content. Document links redirect to SSO login. Users must authenticate in their browser to read the full document.
+
 ### Empty search results
 
 - The API only returns documents with **"All Users"** or **"Public"** security level in **Published** status
@@ -117,13 +123,22 @@ The bridge uses the PolicyTech OpenSearch 1.0/1.1 API:
 ```
 GET {base_url}/content/api/opensearch/2014/06/?MethodName=GetDocuments
     &APIKey={api_key}
-    &SearchField={ALL|TITLE|BODY|NUMBER}
+    &SearchField={ALL|TITLE}
     &itemsPerPage={count}
     &startIndex={offset}
     &SearchTerms={query}
 ```
 
-The response is RSS or Atom XML containing matching published documents with title, description, link, publication date, and optionally a download URL for attached files.
+**Working search fields:**
+
+| SearchField | Behavior |
+|-------------|----------|
+| `ALL` | Searches across title and body content |
+| `TITLE` | Searches document titles only |
+
+The `BODY` and `NUMBER` fields are documented by NAVEX but return HTTP 500 errors in practice. The CLI restricts choices to `ALL` and `TITLE`.
+
+The response is RSS 2.0 XML with OpenSearch 1.1 extensions containing matching published documents. Each item includes a title and a link to view the document (SSO login required). Description fields are typically empty.
 
 > **Note:** NAVEX officially documents this API for SharePoint integration only. The endpoint behavior, response format, and availability may change without notice in future PolicyTech releases.
 

@@ -1,13 +1,13 @@
 ---
 name: navex-policytech
-description: NAVEX PolicyTech bridge -- search and retrieve published policy and procedure documents via the OpenSearch API. Supports keyword search across all fields or by title, full document listing with pagination, and health checks.
+description: NAVEX PolicyTech bridge -- search and retrieve published policy and procedure documents via the OpenSearch API. Supports keyword search across all fields or by title, full document listing with pagination, and health checks. Returns document titles and links only -- document content requires browser authentication.
 compatibility:
   - platform: linux
     arch: amd64
     min_version: "2026.02.24"
 metadata:
   author: tendril-project
-  version: "2026.02.27.3"
+  version: "2026.02.27.4"
   tendril-bridge: "true"
   skill_scope: "bridge"
   tags:
@@ -43,6 +43,8 @@ Search and retrieve published policy and procedure documents from NAVEX PolicyTe
 
 > **Unofficial use:** NAVEX officially supports this API only for SharePoint integration. Using it for general-purpose document search (as this bridge does) is functional but not officially supported -- your mileage may vary.
 
+> **Search-only:** This bridge can find documents by keyword and return their titles and links, but **cannot retrieve document content**. Document links require SSO/browser authentication to view. Think of it as a policy index, not a policy reader.
+
 ## Authentication
 
 - **Type:** API key passed as a URL parameter
@@ -50,6 +52,7 @@ Search and retrieve published policy and procedure documents from NAVEX PolicyTe
 - **Prerequisite:** The "API Keys" add-on must be enabled by NAVEX Support (Professional plan required)
 - **Environment:** `POLICYTECH_BASE_URL` (shared) + `POLICYTECH_API_KEY` (shared) + `POLICYTECH_VERIFY_TLS` (shared, optional)
 - **Scope:** API key can access documents with "All Users" or "Public" security level in "Published" status only
+- **Important:** The API key authenticates search requests only. It does **not** grant access to view document content -- document links redirect to SSO login
 
 ## Deployment Prerequisites
 
@@ -74,18 +77,29 @@ Search and retrieve published policy and procedure documents from NAVEX PolicyTe
 - **Search published documents by keyword** -- full-text search across all document fields (titles, body content) or title-only search
 - **List all published documents** -- enumerate every document accessible via the API key with automatic pagination
 - **Paginate large result sets** -- automatically walks through multiple pages of results (up to 1,000 documents)
-- **Direct document links** -- each result includes a direct URL to view the document in PolicyTech
+- **Direct document links** -- each result includes a direct URL to view the document in PolicyTech (requires user login)
+- **Answer "do we have a policy on X?"** -- the primary use case; find whether a policy exists and get its link
 - **Health monitoring** -- validates API key and connectivity on a 60-second interval
 
 ### What This Bridge Cannot Do
 
-- **No document content retrieval** -- the API returns metadata (title, link) but not the full document body; documents must be viewed via their link URL in a browser
+- **No document content retrieval** -- the API returns titles and links only, not the full document body. Document links require SSO/browser authentication to view. The API key does not grant access to document content. This means the bridge cannot read, summarize, or quote policy text.
 - **No document creation or editing** -- entirely read-only; no workflow actions (approve, retire, etc.)
 - **No draft/archived documents** -- only Published status documents are returned
 - **No per-group documents** -- only documents with "All Users" or "Public" security level are visible
 - **No document number search** -- the `NUMBER` and `BODY` search fields are not functional; only `ALL` and `TITLE` work
 - **No category/department filtering** -- the API does not support filtering by category, department, or owner
 - **No document metadata** -- the API does not return publication date, category, author, or version information (descriptions are typically empty)
+
+### Practical Usage Pattern
+
+This bridge works as a **policy index / directory**, not a policy reader:
+
+1. User asks: "What's our policy on bereavement leave?"
+2. Bridge searches for "bereavement" and returns matching documents with links
+3. User clicks the link and reads the full policy in their browser (requires SSO login)
+
+The bridge cannot tell you *what* the policy says -- only *where* it is.
 
 ## Quick Start
 
@@ -164,7 +178,7 @@ Each API call returns JSON. Documents have this structure:
   "items_per_page": 25,
   "documents": [
     {
-      "title": "24/7 Communicable Disease Response Policy",
+      "title": "Communicable Disease Response Policy",
       "link": "https://yourorg.navexone.com/content/docview/?docid=823",
       "description": ""
     }
@@ -177,10 +191,10 @@ Each API call returns JSON. Documents have this structure:
 | Field | Always present | Description |
 |-------|---------------|-------------|
 | `title` | Yes | Document title |
-| `link` | Yes | Direct URL to view the document in PolicyTech (requires authentication) |
+| `link` | Yes | Direct URL to view the document in PolicyTech (requires SSO authentication) |
 | `description` | Yes | Document description (typically empty in practice) |
 
-The `link` URL follows the pattern `https://yourorg.navexone.com/content/docview/?docid=NNN` where `NNN` is the internal document ID.
+The `link` URL follows the pattern `https://yourorg.navexone.com/content/docview/?docid=NNN` where `NNN` is the internal document ID. Opening this link in a browser will prompt for SSO login before displaying the document.
 
 ## Verified Search Field Behavior
 
@@ -205,11 +219,12 @@ Only `ALL` and `TITLE` are functional. The CLI restricts choices to these two.
 | Empty results | Search too specific, or all docs have restricted security | Try a broader search; check document security levels |
 | SSL certificate error | Proxy or TLS inspection | Set `POLICYTECH_VERIFY_TLS=false` |
 | Empty `description` fields | Normal -- NAVEX does not populate this field for most documents | Use the `link` URL to view full document content |
+| Document link prompts for login | Expected -- document links require SSO authentication | Open in browser and log in; the API key only authorizes search, not document viewing |
 
 ## Notes
 
 - NAVEX officially documents this API for SharePoint integration only; behavior may change without notice in future PolicyTech releases
 - The API returns RSS 2.0 XML with OpenSearch 1.1 extensions; the client parses this into JSON
-- Document links require PolicyTech authentication to view -- they are not publicly accessible URLs
+- Document links require PolicyTech SSO authentication to view -- the API key does not grant access to document content
 - The API key can optionally be IP-restricted in PolicyTech admin settings for security
 - Pagination starts at index 0; the API returns `totalResults` for the total matching count
