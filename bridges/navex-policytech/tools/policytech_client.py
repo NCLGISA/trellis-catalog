@@ -7,6 +7,7 @@ Responses are RSS/Atom XML which this client parses into Python dicts.
 
 import json
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -22,17 +23,21 @@ POLICYTECH_VERIFY_TLS = os.environ.get("POLICYTECH_VERIFY_TLS", "true").lower() 
 
 OPENSEARCH_PATH = "/content/api/opensearch/2014/06/"
 
-# XML namespaces used in OpenSearch RSS responses
-NS = {
-    "atom": "http://www.w3.org/2005/Atom",
-    "opensearch": "http://a9.com/-/spec/opensearch/1.1/",
-    "rss": "",
-}
-
 
 def die(msg):
     print(json.dumps({"error": msg}), file=sys.stderr)
     sys.exit(1)
+
+
+def _extract_html_error(body):
+    """Pull the meaningful error message from a PolicyTech HTML error page."""
+    m = re.search(r'class="error_message_header"[^>]*>([^<]+)', body)
+    header = m.group(1).strip() if m else ""
+    m2 = re.search(r'LGLabelAdditionalInfo[^>]*>([^<]+)', body)
+    detail = m2.group(1).strip() if m2 else ""
+    if header:
+        return f"{header} {detail}".strip()
+    return body[:300]
 
 
 class PolicyTechClient:
@@ -80,7 +85,6 @@ class PolicyTechClient:
         if channel is None:
             channel = root
 
-        # OpenSearch metadata
         for elem in channel:
             tag = elem.tag.split("}")[-1] if "}" in elem.tag else elem.tag
             if tag == "totalResults":
@@ -147,13 +151,21 @@ class PolicyTechClient:
         resp = self.session.get(self.api_url, params=params)
 
         if not resp.ok:
-            die(f"API request failed ({resp.status_code}): {resp.text[:500]}")
+            body = resp.text
+            if "<html" in body.lower():
+                msg = _extract_html_error(body)
+                die(f"API request failed ({resp.status_code}): {msg}")
+            die(f"API request failed ({resp.status_code}): {body[:500]}")
 
         content_type = resp.headers.get("Content-Type", "")
         body = resp.text
 
         if not body.strip():
             return {"total_results": 0, "documents": []}
+
+        if "<html" in body[:500].lower():
+            msg = _extract_html_error(body)
+            die(f"Unexpected HTML response (API may be misconfigured): {msg}")
 
         try:
             if "atom" in content_type.lower() or "<feed" in body[:200]:
