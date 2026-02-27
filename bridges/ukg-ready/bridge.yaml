@@ -1,0 +1,76 @@
+# ============================================================================
+# Tendril Bridge Manifest - UKG Ready
+# ============================================================================
+# UKG Ready -- employee directory, time & attendance, PTO/leave management,
+# payroll configuration, scheduling, reports, and web clock via the UKG Ready
+# REST API (V1/V2).
+# ============================================================================
+
+name: ukg-ready
+version: "2026.02.27.1"
+description: "UKG Ready bridge for employee management, time & attendance, PTO, payroll, scheduling, reports, and web clock"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-ukg-ready"
+  timezone: "UTC"
+
+credentials:
+  - name: "UKG Base URL"
+    env_var: "UKG_BASE_URL"
+    description: >
+      UKG Ready host URL (no trailing slash).
+      Example: https://secure6.saashr.com
+    scope: "shared"
+    required: true
+  - name: "Company Short Name"
+    env_var: "UKG_COMPANY_SHORT_NAME"
+    description: >
+      7-digit company identifier from your UKG Ready login URL
+      (e.g. 6181029 from https://secure6.saashr.com/ta/6181029.login)
+      or from Company Setup > Company Info > Company Address.
+    scope: "shared"
+    required: true
+  - name: "REST API Key"
+    env_var: "UKG_API_KEY"
+    description: >
+      REST API key generated in UKG Ready under Company Setup >
+      Login Config > API Keys. Click GENERATE and copy the value.
+      WARNING: generating a new key invalidates the previous one.
+    scope: "shared"
+    required: true
+  - name: "Service Account Username"
+    env_var: "UKG_USERNAME"
+    description: >
+      Service account username created under Company Setup >
+      Login Config > Service Accounts.
+    scope: "shared"
+    required: true
+  - name: "Service Account Password"
+    env_var: "UKG_PASSWORD"
+    description: >
+      Service account password.
+    scope: "shared"
+    required: true
+  - name: "Verify TLS Certificates"
+    env_var: "UKG_VERIFY_TLS"
+    description: >
+      Set to "false" for environments using self-signed
+      certificates. Defaults to "true".
+    scope: "shared"
+    required: false
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/ukg_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "hcm"
+  tags: "ukg, ukg-ready, kronos, hcm, hr, payroll, time-attendance, pto, scheduling, employees"
