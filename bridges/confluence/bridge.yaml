@@ -1,0 +1,54 @@
+# ============================================================================
+# Tendril Bridge Manifest - Confluence Cloud
+# ============================================================================
+# Confluence Cloud -- full CRUD for pages, spaces, blog posts, comments,
+# labels, tasks, and CQL search via the REST API v2.
+# ============================================================================
+
+name: confluence
+version: "2026.02.27.1"
+description: "Confluence Cloud bridge for pages, spaces, blog posts, comments, labels, tasks, and CQL search via REST API v2"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-confluence"
+  timezone: "UTC"
+
+credentials:
+  - name: "Confluence URL"
+    env_var: "CONFLUENCE_URL"
+    description: >
+      Atlassian site URL (no trailing slash).
+      Example: https://yourorg.atlassian.net
+    scope: "shared"
+    required: true
+  - name: "Atlassian Email"
+    env_var: "CONFLUENCE_EMAIL"
+    description: >
+      Atlassian account email address for basic auth.
+      Per-operator: each user provides their own email.
+    scope: "operator"
+    required: true
+  - name: "Atlassian API Token"
+    env_var: "CONFLUENCE_API_TOKEN"
+    description: >
+      Per-user API token from
+      https://id.atlassian.com/manage-profile/security/api-tokens.
+      Token inherits the creating user's Confluence permissions.
+    scope: "operator"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/confluence_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "collaboration"
+  tags: "confluence, atlassian, wiki, pages, spaces, blog, comments, labels, tasks, search, cql, knowledge-base"
