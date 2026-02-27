@@ -1,0 +1,55 @@
+# ============================================================================
+# Tendril Bridge Manifest - NAVEX PolicyTech
+# ============================================================================
+# NAVEX PolicyTech (Policy & Procedure Management) -- search and retrieve
+# published policy documents via the OpenSearch API.
+# ============================================================================
+
+name: navex-policytech
+version: "2026.02.27.1"
+description: "NAVEX PolicyTech bridge for searching and retrieving published policy and procedure documents"
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-navex-policytech"
+  timezone: "UTC"
+
+credentials:
+  - name: "PolicyTech Base URL"
+    env_var: "POLICYTECH_BASE_URL"
+    description: >
+      NAVEX One PolicyTech base URL (no trailing slash).
+      Typically https://yourorg.navexone.com
+      See references/README.md for how to determine this.
+    scope: "shared"
+    required: true
+  - name: "API Key"
+    env_var: "POLICYTECH_API_KEY"
+    description: >
+      API key generated in PolicyTech under Settings & Tools >
+      IT Settings > API Keys. The API Keys add-on must be enabled
+      by NAVEX Support before keys can be created.
+    scope: "shared"
+    required: true
+  - name: "Verify TLS Certificates"
+    env_var: "POLICYTECH_VERIFY_TLS"
+    description: >
+      Set to "false" for environments using self-signed
+      certificates. Defaults to "true".
+    scope: "shared"
+    required: false
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/policytech_check.py"
+  interval: "60s"
+  timeout: "15s"
+
+metadata:
+  author: "tendril-project"
+  category: "compliance"
+  tags: "navex, policytech, policy, procedure, compliance, governance, documents, opensearch"
