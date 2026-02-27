@@ -50,7 +50,7 @@ def build_parser():
     p_search.add_argument("--query", "-q", required=True,
                           help="Search keywords")
     p_search.add_argument("--field", default="ALL",
-                          choices=["ALL", "TITLE", "BODY", "NUMBER"],
+                          choices=["ALL", "TITLE"],
                           help="Field to search (default: ALL)")
     p_search.add_argument("--limit", type=int, default=25,
                           help="Results per page (default: 25)")
@@ -63,7 +63,7 @@ def build_parser():
     p_all.add_argument("--query", "-q", required=True,
                        help="Search keywords")
     p_all.add_argument("--field", default="ALL",
-                       choices=["ALL", "TITLE", "BODY", "NUMBER"],
+                       choices=["ALL", "TITLE"],
                        help="Field to search (default: ALL)")
     p_all.set_defaults(func=cmd_search_all)
 
