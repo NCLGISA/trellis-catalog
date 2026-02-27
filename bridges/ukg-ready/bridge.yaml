@@ -1,14 +1,13 @@
 # ============================================================================
 # Tendril Bridge Manifest - UKG Ready
 # ============================================================================
-# UKG Ready -- employee directory, time & attendance, PTO/leave management,
-# payroll configuration, scheduling, reports, and web clock via the UKG Ready
-# REST API (V1/V2).
+# UKG Ready -- employee directory, time & attendance, compensation,
+# notifications, and company configuration via the UKG Ready REST API (V1/V2).
 # ============================================================================
 
 name: ukg-ready
-version: "2026.02.27.1"
-description: "UKG Ready bridge for employee management, time & attendance, PTO, payroll, scheduling, reports, and web clock"
+version: "2026.02.27.2"
+description: "UKG Ready bridge for employee management, time & attendance, compensation, notifications, and company configuration"
 
 deployment:
   type: container
@@ -20,15 +19,16 @@ credentials:
   - name: "UKG Base URL"
     env_var: "UKG_BASE_URL"
     description: >
-      UKG Ready host URL (no trailing slash).
-      Example: https://secure6.saashr.com
+      UKG Ready API host URL (no trailing slash).
+      Determined from your login URL -- see references/README.md.
+      Example: https://secureN.saashr.com
     scope: "shared"
     required: true
   - name: "Company Short Name"
     env_var: "UKG_COMPANY_SHORT_NAME"
     description: >
       7-digit company identifier from your UKG Ready login URL
-      (e.g. 6181029 from https://secure6.saashr.com/ta/6181029.login)
+      (e.g. 1234567 from https://secureN.saashr.com/ta/1234567.login)
       or from Company Setup > Company Info > Company Address.
     scope: "shared"
     required: true

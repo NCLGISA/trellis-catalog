@@ -1,13 +1,13 @@
 ---
 name: ukg-ready
-description: UKG Ready bridge for employee directory, time & attendance, PTO/leave management, payroll configuration, scheduling, reports, web clock, and company configuration via the UKG Ready REST API (V1/V2).
+description: UKG Ready bridge for employee directory, time & attendance, compensation, notifications, and company configuration via the UKG Ready REST API (V1/V2).
 compatibility:
   - platform: linux
     arch: amd64
     min_version: "2026.02.27"
 metadata:
   author: tendril-project
-  version: "2026.02.27.1"
+  version: "2026.02.27.2"
   tendril-bridge: "true"
   skill_scope: "bridge"
   tags:
@@ -25,7 +25,7 @@ credentials:
   - key: UKG_BASE_URL
     env: UKG_BASE_URL
     scope: shared
-    description: UKG Ready host URL (e.g. https://secure6.saashr.com)
+    description: UKG Ready host URL (e.g. https://secureN.saashr.com) -- see references/README.md Step 5
   - key: UKG_COMPANY_SHORT_NAME
     env: UKG_COMPANY_SHORT_NAME
     scope: shared
@@ -46,7 +46,7 @@ credentials:
 
 # UKG Ready Bridge
 
-Programmatic access to UKG Ready (formerly Kronos Workforce Ready) via REST API. Supports employee management, PTO/leave, payroll configuration, scheduling, reports, web clock, and company configuration.
+Programmatic access to UKG Ready (formerly Kronos Workforce Ready) via REST API. Supports employee management, compensation, time & attendance, notifications, and company configuration.
 
 ## Authentication
 
@@ -58,11 +58,22 @@ The bridge authenticates via a two-step token flow:
 
 The client automatically refreshes the token before expiry and retries on 401.
 
+## Determining Your API Endpoint URL
+
+UKG Ready hosts tenants across regional clusters (`secure3`, `secure4`, `secure5`, `secure6`, `secure7`, etc.). Find yours from your login URL:
+
+```
+https://secureN.saashr.com/ta/XXXXXXX.login
+         ^^^^^^^ this is your host
+```
+
+Set `UKG_BASE_URL` to `https://secureN.saashr.com` (no trailing slash). See `references/README.md` Step 5 for full details.
+
 ## Credentials
 
 | Variable | Scope | Description |
 |----------|-------|-------------|
-| `UKG_BASE_URL` | shared | Host URL (e.g. `https://secure6.saashr.com`) |
+| `UKG_BASE_URL` | shared | Host URL (e.g. `https://secureN.saashr.com`) |
 | `UKG_COMPANY_SHORT_NAME` | shared | 7-digit company ID from login URL |
 | `UKG_API_KEY` | shared | REST API key from Login Config > API Keys |
 | `UKG_USERNAME` | shared | Service account username |
@@ -75,7 +86,7 @@ The client automatically refreshes the token before expiry and retries on 401.
 |--------|----------|---------|
 | `ukg_client.py` | `/opt/bridge/data/tools/` | Core REST client -- login, token management, V1/V2 URL construction |
 | `ukg.py` | `/opt/bridge/data/tools/` | Unified CLI for all modules |
-| `ukg_check.py` | `/opt/bridge/data/tools/` | Health check: auth, employees, config |
+| `ukg_check.py` | `/opt/bridge/data/tools/` | Health check: auth + employee endpoint validation |
 
 ## Quick Start
 
@@ -84,8 +95,8 @@ python3 /opt/bridge/data/tools/ukg_check.py
 python3 /opt/bridge/data/tools/ukg.py info
 python3 /opt/bridge/data/tools/ukg.py employees list
 python3 /opt/bridge/data/tools/ukg.py employees list --active-only
-python3 /opt/bridge/data/tools/ukg.py pto categories
-python3 /opt/bridge/data/tools/ukg.py reports list
+python3 /opt/bridge/data/tools/ukg.py config cost-centers
+python3 /opt/bridge/data/tools/ukg.py notifications mailbox
 ```
 
 ## CLI Reference
@@ -100,80 +111,51 @@ python3 ukg.py employees demographics --id 12345   # Demographics
 python3 ukg.py employees pay-info --id 12345       # Pay information
 python3 ukg.py employees badges --id 12345         # Badge info
 python3 ukg.py employees contacts --id 12345       # Contacts
-python3 ukg.py employees custom-fields --id 12345  # HR custom fields
+python3 ukg.py employees profiles --id 12345       # Employee profiles
+python3 ukg.py employees attendance --id 12345     # Attendance status
+python3 ukg.py employees holidays --id 12345       # Holiday assignments
 python3 ukg.py employees search --query "Smith"    # Search by name
 ```
 
-### pto -- PTO / Time-Off
+### compensation -- Employee Compensation
 
 ```bash
-python3 ukg.py pto categories                      # Time-off categories
-python3 ukg.py pto requests                        # All PTO requests
-python3 ukg.py pto requests --id 12345             # Employee PTO requests
-python3 ukg.py pto accruals --id 12345             # Accrual balances
-python3 ukg.py pto submit --id 12345 --start-date 2026-03-01 --end-date 2026-03-02 --category "Vacation"
-```
-
-### payroll -- Payroll Configuration
-
-```bash
-python3 ukg.py payroll pay-periods                 # Pay period profiles
-python3 ukg.py payroll pay-types                   # Pay types
-python3 ukg.py payroll rate-tables                 # Rate tables
-python3 ukg.py payroll deductions --id 12345       # Employee deductions
-python3 ukg.py payroll compensation --id 12345     # Total compensation
-```
-
-### schedule -- Scheduling
-
-```bash
-python3 ukg.py schedule list --id 12345            # Employee schedule
-python3 ukg.py schedule work-prefs --id 12345      # Work time preferences
-```
-
-### reports -- Reports
-
-```bash
-python3 ukg.py reports list                        # Available reports
-python3 ukg.py reports run --report-id 100         # Run global report
-python3 ukg.py reports saved --report-id 100       # Run saved report
-python3 ukg.py reports metadata --report-id 100    # Report metadata
-```
-
-### webclock -- Web Clock
-
-```bash
-python3 ukg.py webclock punch --id 12345           # Clock punch
-python3 ukg.py webclock punch --id 12345 --punch-type in
-```
-
-### contracts -- Employee Contracts
-
-```bash
-python3 ukg.py contracts list --id 12345           # Employee contracts
+python3 ukg.py compensation total --id 12345       # Total compensation
+python3 ukg.py compensation history --id 12345     # Compensation history
+python3 ukg.py compensation additional --id 12345  # Additional compensation
 ```
 
 ### config -- Company Configuration
 
 ```bash
-python3 ukg.py config cost-centers                 # Cost centers
-python3 ukg.py config account-groups               # Account groups
-python3 ukg.py config announcements                # Announcements
-python3 ukg.py config holidays                     # Holiday profiles
+python3 ukg.py config cost-centers                           # Cost centers (default tree 0)
+python3 ukg.py config cost-centers --tree-index 4            # Specific tree index
+python3 ukg.py config cost-center-lists                      # Cost center list definitions
 ```
 
-### export -- Data Exports
+### notifications -- Notifications and Mailbox
 
 ```bash
-python3 ukg.py export list                         # Available exports
-python3 ukg.py export status --export-id 100       # Export status
+python3 ukg.py notifications mailbox                                       # Last 30 days
+python3 ukg.py notifications mailbox --created-from 2026-01-01 --created-to 2026-01-31  # Date range
+python3 ukg.py notifications todo --id 12345                               # Employee to-do items
 ```
 
 ### info -- Connection Info
 
 ```bash
-python3 ukg.py info                                # Token status, company ID
+python3 ukg.py info                                # Token status, company ID, base URL
 ```
+
+## Per-Employee Time Entries
+
+The V2 API exposes per-employee time entries (max 31-day range per request):
+
+```
+GET /ta/rest/v2/companies/{cid}/employees/{id}/time-entries?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
+```
+
+Each entry includes `total` (milliseconds), `type` (TIME, etc.), `cost_centers`, and `approval_status`. The `ukg_client.py` helper can be used directly for bulk time queries.
 
 ## API Notes
 
@@ -183,3 +165,4 @@ python3 ukg.py info                                # Token status, company ID
 - Token TTL is 1 hour; the client refreshes automatically
 - Rate limiting returns HTTP 429; the client retries with exponential backoff
 - Employee records include HATEOAS `_links` to sub-resources (demographics, badges, pay-info, profiles)
+- Time entry queries are limited to 31-day ranges; iterate in monthly chunks for longer periods

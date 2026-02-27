@@ -23,7 +23,7 @@ If the **Service Accounts** or **API Keys** widgets are not visible on your Logi
 7. Also drag **API Keys** into the same column for convenience
 8. Click **SAVE**, then click **BACK** to return to Company Setup
 
-> **Tip:** The screenshot below shows the Tabs Configuration layout with Service Accounts and API Keys being added to the Login Config tab columns.
+> **Tip:** The Tabs Configuration layout shows Service Accounts and API Keys being added to the Login Config tab columns.
 
 ---
 
@@ -63,34 +63,86 @@ The Company Short Name is a 7-digit number required for authentication.
 
 **Option B -- From your login URL:**
 - Your UKG Ready login URL looks like: `https://secureN.saashr.com/ta/XXXXXXX.login`
-- The last 7 digits (`XXXXXXX`) are your Company Short Name
+- The 7 digits (`XXXXXXX`) are your Company Short Name
 
 ---
 
-## Step 5: Identify Your Host
+## Step 5: Determine Your API Endpoint URL
+
+UKG Ready hosts tenants across multiple regional clusters. Each cluster has its
+own hostname. You must identify which cluster hosts your tenant so the bridge
+can reach the correct API endpoint.
+
+### How to find your host
+
+**Option A -- From your login URL (fastest):**
+
+When you log into UKG Ready, look at the browser address bar. The URL will be
+in the format:
+
+```
+https://secureN.saashr.com/ta/XXXXXXX.login
+```
+
+The `secureN` portion is your host. Known clusters include `secure3`, `secure4`,
+`secure5`, `secure6`, and `secure7`, though others may exist.
+
+**Option B -- From the REST API documentation page:**
+
+UKG Ready publishes interactive API docs at each cluster. Navigate to:
+
+```
+https://secureN.saashr.com/ta/docs/rest/public/
+```
+
+Replace `N` with the number from your login URL. If the page loads and shows
+the REST API documentation, you have the correct host.
+
+**Option C -- Ask your UKG administrator:**
+
+Your UKG account representative or system administrator will know which
+regional cluster your tenant is provisioned on.
+
+### Setting the URL
+
+Set `UKG_BASE_URL` to the **root URL only** -- no trailing slash and no path:
+
+| Correct | Incorrect |
+|---------|-----------|
+| `https://secure3.saashr.com` | `https://secure3.saashr.com/` |
+| `https://secure6.saashr.com` | `https://secure6.saashr.com/ta/rest/v2` |
+
+The bridge appends the appropriate API paths automatically.
+
+---
+
+## Step 6: Identify Your Host (summary)
 
 Your UKG Ready host is the domain from your login URL:
+
 - `https://secure3.saashr.com` -- host is `secure3`
-- `https://secure6.saashr.com` -- host is `secure6`
+- `https://secure5.saashr.com` -- host is `secure5`
 - `https://secure7.saashr.com` -- host is `secure7`
+
+Use the full URL (e.g. `https://secureN.saashr.com`) as the value for `UKG_BASE_URL`.
 
 ---
 
-## Step 6: Configure the Bridge
+## Step 7: Configure the Bridge
 
 Set these environment variables (or store via `trellis credentials set`):
 
 | Variable | Example | Description |
 |----------|---------|-------------|
-| `UKG_BASE_URL` | `https://secure6.saashr.com` | Your UKG Ready host URL |
-| `UKG_COMPANY_SHORT_NAME` | `6181029` | 7-digit company identifier |
-| `UKG_API_KEY` | `2lo33...` | REST API key from Step 3 |
+| `UKG_BASE_URL` | `https://secureN.saashr.com` | Your UKG Ready host URL (see Step 5) |
+| `UKG_COMPANY_SHORT_NAME` | `1234567` | 7-digit company identifier |
+| `UKG_API_KEY` | *(your API key)* | REST API key from Step 3 |
 | `UKG_USERNAME` | `Tendril` | Service account username |
-| `UKG_PASSWORD` | `(your password)` | Service account password |
+| `UKG_PASSWORD` | *(your password)* | Service account password |
 
 ---
 
-## Step 7: Verify
+## Step 8: Verify
 
 Run the health check to confirm everything is working:
 
@@ -104,10 +156,9 @@ Expected output:
   "bridge": "ukg-ready",
   "checks": [
     {"name": "auth", "status": "pass", "company_id": "..."},
-    {"name": "employees", "status": "pass", "employee_count": ...},
-    {"name": "config", "status": "pass", "cost_center_count": ...}
+    {"name": "employees", "status": "pass", "employee_count": "..."}
   ],
-  "summary": "3/3 checks passed",
+  "summary": "2/2 checks passed",
   "healthy": true
 }
 ```
@@ -128,7 +179,7 @@ The client automatically refreshes the token before expiry.
 
 ## API Reference
 
-- **REST API Documentation:** `https://secure.saashr.com/ta/docs/rest/public/`
+- **REST API Documentation:** `https://secureN.saashr.com/ta/docs/rest/public/` (replace N with your cluster number)
 - **V1 Endpoints:** `/ta/rest/v1/company/{cid}/...`
 - **V2 Endpoints:** `/ta/rest/v2/companies/{cid}/...`
 
@@ -143,3 +194,4 @@ The client automatically refreshes the token before expiry.
 | `Company not found` (404) | Wrong company ID in URL path | The bridge extracts company ID from JWT automatically |
 | `Authentication is required` (401) | Token expired or missing | The bridge auto-refreshes; check credentials if persistent |
 | `Method Not Allowed` (405) | Wrong HTTP method | Verify you're using POST for login, GET for queries |
+| Connection timeout | Wrong host | Verify `UKG_BASE_URL` matches your login URL cluster (see Step 5) |
