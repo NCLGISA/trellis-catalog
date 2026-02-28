@@ -15,7 +15,6 @@ services:
       - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
       - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL}
       - SPLUNK_URL=${SPLUNK_URL}
-      - SPLUNK_TOKEN=${SPLUNK_TOKEN}
       - SPLUNK_VERIFY_TLS=${SPLUNK_VERIFY_TLS:-true}
     healthcheck:
       test: ["CMD-SHELL", "python3 /opt/bridge/data/tools/splunk_check.py || exit 1"]

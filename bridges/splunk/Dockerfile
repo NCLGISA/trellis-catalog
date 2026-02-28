@@ -2,7 +2,7 @@
 # Bridge: splunk v2026.02.24.2
 FROM tendril-bridge-base:latest
 
-ARG BRIDGE_SEED_VERSION=1
+ARG BRIDGE_SEED_VERSION=2
 ENV BRIDGE_SEED_VERSION=${BRIDGE_SEED_VERSION}
 
 RUN pip install --no-cache-dir requests>=2.31.0
