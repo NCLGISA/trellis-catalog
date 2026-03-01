@@ -78,17 +78,40 @@ Host bridges have a higher review bar due to the absence of container isolation.
 - `deployment.target_hint` -- human-readable description of where this bridge runs
 - `deployment.requires` -- list of required tools on the target (e.g., `[powershell, sqlcmd]`)
 
-## Sanitization Rules
+## Sanitization and Security Scanning
 
-All bridges in this catalog are designed for cross-organizational use. Submissions must not contain:
+All bridges in this catalog are designed for cross-organizational use.
+CI enforces a three-tier security scanning gate on every PR and push
+to `main`. See [docs/SCANNING-RULES.md](docs/SCANNING-RULES.md) for
+the full rules, regexes, and allowlists.
 
-- Organization-specific domains, IP addresses, or hostnames
-- Account IDs, tenant IDs, or subscription identifiers
-- API keys, tokens, or credentials (even expired ones)
-- Internal network ranges or VLAN configurations
-- Employee names, email addresses, or other PII
+### What Will Block Your PR (Tier 1 -- Credentials)
 
-Environment variables in `docker-compose.yml` must use `${VARIABLE_NAME}` syntax with placeholder values.
+- AWS access keys (`AKIA...`)
+- Private key blocks (`-----BEGIN ... PRIVATE KEY-----`)
+- Hardcoded credential assignments (`password = "realvalue"`, `api_key = "abc123..."`)
+- Database connection strings with embedded passwords (`postgres://user:pass@host`)
+
+### What Will Generate Warnings (Tier 2 -- PII)
+
+- Email addresses not on the allowlist (use `@example.com`, `@contoso.com`)
+- RFC 1918 private IPs not on the allowlist (use `10.0.0.1`, `192.168.1.1`, or RFC 5737 addresses like `192.0.2.x`)
+- UUIDs (use `00000000-0000-0000-0000-000000000000` for placeholders)
+- Internal hostname patterns (`srv-*`, `dc-*`, `az##s##`)
+
+### What Will Block Your PR (Tier 3 -- Org-Specific)
+
+- Organization-specific domains and infrastructure names defined in
+  `.github/sanitization-patterns.txt`
+
+### Safe Patterns
+
+Submissions must follow these conventions:
+
+- **Credentials** -- always use `os.environ["VAR"]` or `os.getenv("VAR")`, never string literals
+- **Compose files** -- use `${VARIABLE_NAME}` syntax, never inline values
+- **`.env.example`** -- use descriptive placeholders (`your-api-key-here`), never real keys
+- **Documentation** -- use RFC 2606 domains (`example.com`, `contoso.com`) and RFC 5737 IPs (`192.0.2.x`, `198.51.100.x`, `203.0.113.x`)
 
 ## Pull Request Process
 
@@ -98,13 +121,35 @@ Environment variables in `docker-compose.yml` must use `${VARIABLE_NAME}` syntax
 4. **Submit a PR** with a description of what the bridge does, what auth model it uses, and what platforms/editions it supports
 5. **CI validation** runs automatically -- the PR must pass all checks before review
 
+### What CI Checks
+
+The validation workflow runs the following checks on every PR:
+
+| Check | Type | Scope |
+|-------|------|-------|
+| `bridge.yaml` presence and required fields | Blocking | Changed bridges |
+| CalVer version format | Blocking | Changed bridges |
+| Entrypoint execute permissions | Blocking | All bridges |
+| SKILL.md YAML frontmatter | Blocking | All bridges |
+| Core triad file presence | Blocking | Changed container bridges |
+| Python syntax compilation (`py_compile`) | Blocking | All bridge scripts |
+| Hardcoded credentials scan | Blocking | All bridges |
+| Org-specific pattern scan | Blocking | All bridges |
+| PII and internal reference scan | Advisory | All bridges |
+| pip-audit dependency scan | Advisory | All requirements.txt |
+
+Advisory checks produce warnings in the CI log but do not block merge.
+Blocking checks must pass for the PR to be mergeable.
+
 ### PR Checklist -- Container Bridges
 
 - [ ] `bridge.yaml` has all required fields (including `deployment.base`, `deployment.hostname`)
 - [ ] `entrypoint.sh` has execute permissions (`chmod +x`)
 - [ ] Core triad present: `{name}_client.py`, `{name}_check.py`, `{name}_bridge_tests.py`
 - [ ] SKILL.md has valid YAML frontmatter with description, tags, and author
-- [ ] No organization-specific content (domains, IDs, credentials)
+- [ ] No hardcoded credentials (use `os.environ` / `os.getenv`)
+- [ ] No organization-specific content (domains, IPs, hostnames, IDs)
+- [ ] `.env.example` uses placeholder values only
 - [ ] `requirements.txt` lists all Python dependencies with version pins
 - [ ] Bridge builds successfully with `trellis build`
 - [ ] Tests pass with valid credentials (describe how to verify in PR description)
@@ -115,8 +160,8 @@ Environment variables in `docker-compose.yml` must use `${VARIABLE_NAME}` syntax
 - [ ] `deployment.type` is `host` -- no Dockerfile, docker-compose.yml, or entrypoint.sh present
 - [ ] Tool scripts present in `tools/` with appropriate extensions (`.ps1` for Windows, `.py`/`.sh` for Linux)
 - [ ] SKILL.md has valid YAML frontmatter with description, tags, author, and `skill_scope: bridge`
-- [ ] No organization-specific content (domains, IDs, credentials)
-- [ ] No hardcoded credentials in scripts (all sensitive values accessed via parameters or environment)
+- [ ] No hardcoded credentials (all sensitive values accessed via parameters or environment)
+- [ ] No organization-specific content (domains, IPs, hostnames, IDs)
 - [ ] Scripts are read-only by default; any write operations are clearly documented in SKILL.md
 - [ ] Bridge validates successfully with `trellis validate`
 

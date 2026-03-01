@@ -57,6 +57,48 @@ This first-party catalog is always available automatically.
 
 Container bridges are built locally by the operator using `trellis build` (or `trellis build --standalone` for environments without a pre-built base image). Host bridges are packaged via `trellis package` and deployed via `trellis deploy --target <agent>`. No pre-built images are distributed -- the catalog provides source definitions only.
 
+## CI Validation and Security Scanning
+
+Every pull request and push to `main` that touches `bridges/**` runs an
+automated validation pipeline. The workflow is organized into three areas:
+
+### Structure and Manifest Checks
+
+- `bridge.yaml` presence and required fields (`name`, `version`, `description`, `deployment.type`)
+- CalVer version format (`YYYY.MM.DD.MICRO`)
+- Entrypoint execute permissions (`chmod +x`)
+- SKILL.md YAML frontmatter
+- Core triad enforcement for container bridges (`{name}_client.py`, `{name}_check.py`, `{name}_bridge_tests.py`)
+- Python syntax compilation (`py_compile`) across all bridge scripts
+
+### Security Scanning (Three Tiers)
+
+| Tier | Behavior | What It Catches |
+|------|----------|-----------------|
+| 1 -- Credentials | **Blocks merge** | AWS access keys, private keys, hardcoded passwords/secrets, connection strings with embedded credentials |
+| 2 -- PII | **Advisory warning** | Email addresses, RFC 1918 private IPs, UUIDs, internal hostname patterns (with allowlists for documentation examples) |
+| 3 -- Org-specific | **Blocks merge** | Organization-specific domains and infrastructure names (configurable via `.github/sanitization-patterns.txt`) |
+
+The full scanning rules, regexes, allowlists, and safe-pattern guidance
+are documented in [docs/SCANNING-RULES.md](docs/SCANNING-RULES.md). The
+Trellis CLI references this document to ensure generated bridge code
+passes the catalog gate.
+
+### Dependency Scanning
+
+All `bridges/*/requirements.txt` files are scanned with
+[pip-audit](https://github.com/pypa/pip-audit) for known vulnerabilities.
+This runs as an advisory check (does not block merge). GitHub Actions
+dependencies are monitored by Dependabot.
+
+## Security Methodology
+
+The catalog's security posture is defined in
+[docs/SECURE-CODE-METHODOLOGY.md](docs/SECURE-CODE-METHODOLOGY.md),
+adapted from the
+[Trellis CLI Secure Code Methodology](https://github.com/NCLGISA/trellis/blob/main/docs/SECURE-CODE-METHODOLOGY.md)
+for a content repository with executable scripts.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose new bridges or improve existing ones, and [docs/bridge-authoring-guide.md](docs/bridge-authoring-guide.md) for the full bridge authoring reference.
