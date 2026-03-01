@@ -1,0 +1,15 @@
+# Organization-specific sanitization patterns
+# One pattern per line (grep -E extended regex syntax)
+# Lines starting with # are comments, blank lines are ignored
+#
+# These patterns catch leakage from the deploying organization.
+# Add patterns specific to your org's domains, naming conventions,
+# and infrastructure identifiers.
+
+# Rowan County domains
+rowancountync\.gov
+
+# Internal DNS suffixes
+\.internal\.
+
+# Add additional org-specific patterns below as needed

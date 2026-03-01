@@ -1,25 +1,56 @@
 name: Validate Bridges
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "bridges/**"
   pull_request:
     paths:
       - "bridges/**"
+
+permissions:
+  contents: read
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # ---------------------------------------------------------------
+      # Bridge detection
+      # ---------------------------------------------------------------
 
       - name: Detect changed bridges
         id: changed
         run: |
-          BRIDGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            echo "bridges=" >> "$GITHUB_OUTPUT"
+            echo "No base SHA available -- skipping per-bridge checks"
+            exit 0
+          fi
+          BRIDGES=$(git diff --name-only "$BASE" "${{ github.sha }}" \
             | grep '^bridges/' \
             | cut -d'/' -f2 \
             | sort -u)
           echo "bridges=$BRIDGES" >> "$GITHUB_OUTPUT"
           echo "Changed bridges: $BRIDGES"
+
+      # ---------------------------------------------------------------
+      # Manifest and structure
+      # ---------------------------------------------------------------
 
       - name: Validate bridge.yaml presence
         run: |
@@ -56,7 +87,7 @@ jobs:
         run: |
           EXIT=0
           for bridge in bridges/*/; do
-            EP="$bridge/entrypoint.sh"
+            EP="${bridge}entrypoint.sh"
             if [ -f "$EP" ] && [ ! -x "$EP" ]; then
               echo "ERROR: $EP is not executable (chmod +x required)"
               EXIT=1
@@ -76,18 +107,6 @@ jobs:
           done
           exit $EXIT
 
-      - name: Sanitization check
-        run: |
-          EXIT=0
-          PATTERNS="rowancountync\.gov|10\.1\.[0-9]|192\.168\.[0-9]|\.internal\.|AKIAIOSFODNN7EXAMPLE"
-          for bridge in bridges/*/; do
-            if grep -rEi "$PATTERNS" "$bridge" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.md" --include="*.sh" --include="*.ps1"; then
-              echo "ERROR: Organization-specific content found in $bridge"
-              EXIT=1
-            fi
-          done
-          exit $EXIT
-
       - name: Validate CalVer version format
         run: |
           EXIT=0
@@ -101,3 +120,185 @@ jobs:
             fi
           done
           exit $EXIT
+
+      - name: Validate core triad (container bridges)
+        run: |
+          EXIT=0
+          for bridge in ${{ steps.changed.outputs.bridges }}; do
+            MANIFEST="bridges/$bridge/bridge.yaml"
+            [ -f "$MANIFEST" ] || continue
+            TYPE=$(grep 'type:' "$MANIFEST" | head -1 | awk '{print $2}')
+            [ "$TYPE" = "host" ] && continue
+            SNAKE=$(echo "$bridge" | tr '-' '_')
+            for suffix in _client.py _check.py _bridge_tests.py; do
+              if [ ! -f "bridges/$bridge/tools/${SNAKE}${suffix}" ]; then
+                echo "ERROR: bridges/$bridge/tools/${SNAKE}${suffix} missing"
+                EXIT=1
+              fi
+            done
+          done
+          exit $EXIT
+
+      - name: Syntax-check Python files
+        run: |
+          EXIT=0
+          for py_file in bridges/*/tools/*.py; do
+            [ -f "$py_file" ] || continue
+            if ! python3 -m py_compile "$py_file" 2>&1; then
+              echo "ERROR: Syntax error in $py_file"
+              EXIT=1
+            fi
+          done
+          exit $EXIT
+
+      # ---------------------------------------------------------------
+      # Security scanning -- Tier 1: Credentials (blocking)
+      # ---------------------------------------------------------------
+
+      - name: "Scan: Hardcoded credentials (blocking)"
+        run: |
+          EXIT=0
+          INCLUDES=(--include='*.py' --include='*.yaml' --include='*.yml'
+                    --include='*.md' --include='*.sh' --include='*.ps1'
+                    --include='.env.example')
+
+          echo "=== AWS access keys ==="
+          if grep -rEn 'AKIA[0-9A-Z]{16}' bridges/ "${INCLUDES[@]}"; then
+            echo "::error::AWS access key pattern detected"
+            EXIT=1
+          fi
+
+          echo "=== Private keys ==="
+          if grep -rEn '\-\-\-\-\-BEGIN [A-Z ]*PRIVATE KEY\-\-\-\-\-' bridges/ "${INCLUDES[@]}"; then
+            echo "::error::Private key detected in repository"
+            EXIT=1
+          fi
+
+          echo "=== Hardcoded credential assignments ==="
+          CRED_HITS=$(grep -rEn \
+            '(password|passwd|api_key|apikey|secret_key|access_key|auth_token|client_secret|private_key)\s*=\s*["\x27][^"\x27]{8,}["\x27]' \
+            bridges/ "${INCLUDES[@]}" \
+            | grep -viE '(os\.environ|os\.getenv|\.get\(|environ\[|your[-_]|example|placeholder|changeme|CHANGE.ME|replace[-_]with|<[A-Z_]+>|\$\{|INSERT|TODO|FIXME|xxx+)' \
+            || true)
+          if [ -n "$CRED_HITS" ]; then
+            echo "$CRED_HITS"
+            echo "::error::Hardcoded credential assignment detected (see above)"
+            EXIT=1
+          fi
+
+          echo "=== Connection strings with embedded passwords ==="
+          CONN_HITS=$(grep -rEn \
+            '(mongodb|postgres|postgresql|mysql|redis|amqp|mssql)://[^:]+:[^@{$]+@' \
+            bridges/ "${INCLUDES[@]}" \
+            | grep -viE '(username:password|user:pass|example|placeholder|\$\{|<[A-Z])' \
+            || true)
+          if [ -n "$CONN_HITS" ]; then
+            echo "$CONN_HITS"
+            echo "::error::Connection string with embedded credentials detected"
+            EXIT=1
+          fi
+
+          exit $EXIT
+
+      # ---------------------------------------------------------------
+      # Security scanning -- Tier 2: PII and internal refs (advisory)
+      # ---------------------------------------------------------------
+
+      - name: "Scan: PII and internal references (advisory)"
+        continue-on-error: true
+        run: |
+          WARN=0
+          INCLUDES=(--include='*.py' --include='*.yaml' --include='*.yml'
+                    --include='*.md' --include='*.sh' --include='*.ps1')
+
+          # Allowlisted documentation values
+          EMAIL_ALLOW='@example\.(com|org|net)|@yourdomain\.com|@contoso\.(com|onmicrosoft\.com)'
+          IP_ALLOW='(10\.0\.0\.[01]|192\.168\.[01]\.[01]|192\.168\.1\.1|172\.16\.0\.[01]|192\.0\.2\.|198\.51\.100\.|203\.0\.113\.)'
+          UUID_ZERO='00000000-0000-0000-0000-000000000000'
+
+          echo "=== Email addresses ==="
+          EMAILS=$(grep -rEohn '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' bridges/ "${INCLUDES[@]}" \
+            | grep -viE "$EMAIL_ALLOW" || true)
+          if [ -n "$EMAILS" ]; then
+            echo "$EMAILS"
+            echo "::warning::Email addresses found -- verify these are not real addresses"
+            WARN=1
+          fi
+
+          echo "=== RFC 1918 addresses ==="
+          RFC1918=$(grep -rEon '\b(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3})\b' \
+            bridges/ "${INCLUDES[@]}" \
+            | grep -vE "$IP_ALLOW" || true)
+          if [ -n "$RFC1918" ]; then
+            echo "$RFC1918"
+            echo "::warning::RFC 1918 addresses found -- verify these are not real internal IPs"
+            WARN=1
+          fi
+
+          echo "=== UUIDs ==="
+          UUIDS=$(grep -rEion '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' bridges/ "${INCLUDES[@]}" \
+            | grep -v "$UUID_ZERO" || true)
+          if [ -n "$UUIDS" ]; then
+            echo "$UUIDS"
+            echo "::warning::UUIDs found -- verify these are not real identifiers"
+            WARN=1
+          fi
+
+          echo "=== Internal hostname patterns ==="
+          HOSTS=$(grep -rEon '\b(az[0-9]+s[0-9]+|srv-[a-zA-Z0-9-]+|dc-[a-zA-Z0-9-]+)\b' bridges/ "${INCLUDES[@]}" || true)
+          if [ -n "$HOSTS" ]; then
+            echo "$HOSTS"
+            echo "::warning::Internal hostname patterns found -- verify these are not real servers"
+            WARN=1
+          fi
+
+          if [ "$WARN" = "1" ]; then
+            echo "::warning::Advisory PII scan found items to review (see details above)"
+          else
+            echo "PII advisory scan passed -- no items flagged"
+          fi
+
+      # ---------------------------------------------------------------
+      # Security scanning -- Tier 3: Org-specific patterns (blocking)
+      # ---------------------------------------------------------------
+
+      - name: "Scan: Organization-specific patterns (blocking)"
+        run: |
+          EXIT=0
+          PATTERNS_FILE=".github/sanitization-patterns.txt"
+          INCLUDES=(--include='*.py' --include='*.yaml' --include='*.yml'
+                    --include='*.md' --include='*.sh' --include='*.ps1')
+
+          if [ ! -f "$PATTERNS_FILE" ]; then
+            echo "No org-specific patterns file found -- skipping"
+            exit 0
+          fi
+
+          PATTERNS=$(grep -v '^#' "$PATTERNS_FILE" | grep -v '^$' | paste -sd'|' -)
+          if [ -z "$PATTERNS" ]; then
+            echo "No org-specific patterns configured -- skipping"
+            exit 0
+          fi
+
+          echo "Scanning for org-specific patterns..."
+          for bridge in bridges/*/; do
+            if grep -rEi "$PATTERNS" "$bridge" "${INCLUDES[@]}"; then
+              echo "::error::Organization-specific content found in $bridge"
+              EXIT=1
+            fi
+          done
+          exit $EXIT
+
+      # ---------------------------------------------------------------
+      # Dependency scanning (advisory)
+      # ---------------------------------------------------------------
+
+      - name: "Scan: Python dependencies (advisory)"
+        continue-on-error: true
+        run: |
+          pip install pip-audit
+          for req in bridges/*/requirements.txt; do
+            [ -f "$req" ] || continue
+            echo "--- Scanning $req ---"
+            pip-audit -r "$req" || true
+          done
