@@ -6,7 +6,7 @@ with automatic token refresh, pagination, and rate-limit handling.
 
 Authentication uses MSAL client_credentials flow:
   - POST to Entra ID token endpoint with client_id + client_secret
-  - Scope: https://management.azure.com/.default
+  - Scope: https://management.azure.com/.default (or .usgovcloudapi.net for Gov)
   - Tokens are valid for ~1 hour
   - Tokens are cached and auto-refreshed 5 minutes before expiry
 
@@ -15,6 +15,7 @@ Environment variables (set in docker-compose.yml):
   ARM_CLIENT_ID          - App registration client ID
   ARM_CLIENT_SECRET      - App registration client secret
   AZURE_SUBSCRIPTION_ID  - Azure subscription ID
+  AZURE_CLOUD            - "usgovernment" (default) or "commercial"
 """
 
 import os
@@ -35,10 +36,25 @@ TENANT_ID = os.getenv("AZURE_TENANT_ID", "")
 CLIENT_ID = os.getenv("ARM_CLIENT_ID", "")
 CLIENT_SECRET = os.getenv("ARM_CLIENT_SECRET", "")
 SUBSCRIPTION_ID = os.getenv("AZURE_SUBSCRIPTION_ID", "")
+AZURE_CLOUD = os.getenv("AZURE_CLOUD", "usgovernment").lower()
 
-TOKEN_URL_TEMPLATE = "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token"
-ARM_BASE = "https://management.azure.com"
-ARM_SCOPE = "https://management.azure.com/.default"
+CLOUD_ENDPOINTS = {
+    "usgovernment": {
+        "login": "https://login.microsoftonline.us",
+        "arm": "https://management.usgovcloudapi.net",
+        "scope": "https://management.usgovcloudapi.net/.default",
+    },
+    "commercial": {
+        "login": "https://login.microsoftonline.com",
+        "arm": "https://management.azure.com",
+        "scope": "https://management.azure.com/.default",
+    },
+}
+
+_ep = CLOUD_ENDPOINTS.get(AZURE_CLOUD, CLOUD_ENDPOINTS["usgovernment"])
+TOKEN_URL_TEMPLATE = _ep["login"] + "/{tenant}/oauth2/v2.0/token"
+ARM_BASE = _ep["arm"]
+ARM_SCOPE = _ep["scope"]
 DEFAULT_API_VERSION = "2024-03-01"
 
 TOKEN_REFRESH_BUFFER_SECS = 300
@@ -222,7 +238,6 @@ class ArmClient:
 
     def get_vm(self, resource_group: str, vm_name: str, instance_view: bool = False) -> dict:
         """Get a VM by name. Set instance_view=True for power state."""
-        expand = "$expand=instanceView" if instance_view else ""
         path = (
             f"{self.sub_path}/resourceGroups/{resource_group}"
             f"/providers/Microsoft.Compute/virtualMachines/{vm_name}"
@@ -448,6 +463,8 @@ class ArmClient:
             rgs = self.list_resource_groups()
             return {
                 "ok": True,
+                "cloud": AZURE_CLOUD,
+                "arm_endpoint": ARM_BASE,
                 "subscription_id": sub.get("subscriptionId"),
                 "display_name": sub.get("displayName"),
                 "state": sub.get("state"),

@@ -3,11 +3,12 @@
 # ============================================================================
 # Azure Resource Manager bridge -- VMs, NSGs, storage, AVD, Arc, Key Vault,
 # Recovery Services, SQL, monitoring, and cost data via az CLI and REST API.
+# Supports both Azure Commercial and Azure Government (GCC/GCC High).
 # ============================================================================
 
 name: azure
-version: "2026.02.19.1"
-description: "Azure Resource Manager bridge for VMs, NSGs, storage, AVD, Arc, Key Vault, Recovery Services, SQL, and monitoring"
+version: "2026.03.01.1"
+description: "Azure Resource Manager bridge for VMs, NSGs, storage, AVD, Arc, Key Vault, Recovery Services, SQL, and monitoring (Commercial and Government)"
 
 deployment:
   type: container
@@ -16,19 +17,29 @@ deployment:
   timezone: "UTC"
 
 credentials:
+  - name: "Azure Cloud"
+    env_var: "AZURE_CLOUD"
+    description: "Target cloud: 'usgovernment' or 'commercial' (determines login, ARM, and scope endpoints)"
+    scope: "shared"
+    required: true
   - name: "Azure Tenant ID"
     env_var: "AZURE_TENANT_ID"
-    description: "Entra ID tenant ID for service principal authentication"
+    description: "Entra ID tenant ID (from portal.azure.us for Gov, portal.azure.com for Commercial)"
     scope: "shared"
     required: true
   - name: "Azure Client ID"
-    env_var: "AZURE_CLIENT_ID"
+    env_var: "ARM_CLIENT_ID"
     description: "App registration client ID (service principal)"
     scope: "shared"
     required: true
   - name: "Azure Client Secret"
-    env_var: "AZURE_CLIENT_SECRET"
+    env_var: "ARM_CLIENT_SECRET"
     description: "App registration client secret"
+    scope: "shared"
+    required: true
+  - name: "Azure Subscription ID"
+    env_var: "AZURE_SUBSCRIPTION_ID"
+    description: "Target Azure subscription ID"
     scope: "shared"
     required: true
 
@@ -47,17 +58,17 @@ dependencies:
     - "net-tools"
     - "traceroute"
     - "gnupg"
-    - "lsb-release"
+    - "azure-cli"
 
 healthcheck:
   script: "python3 /opt/bridge/data/tools/arm_check.py"
   interval: "60s"
-  timeout: "10s"
+  timeout: "30s"
 
 metadata:
   author: "tendril-project"
   category: "cloud"
-  tags: "azure, arm, compute, networking, avd, storage, keyvault, recovery, sql, arc, monitoring"
+  tags: "azure, arm, compute, networking, avd, storage, keyvault, recovery, sql, arc, monitoring, government, gcc"
 
 canopy_references:
   - id: "organizational-glossary"

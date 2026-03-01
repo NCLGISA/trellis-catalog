@@ -1,13 +1,13 @@
 ---
 name: azure-arm
-description: Access Azure Resource Manager -- VMs, NSGs, storage, AVD, Arc, Key Vault, Recovery Services, SQL, monitoring, and all resource types across your Azure subscription via az CLI and Python REST helpers.
+description: Access Azure Resource Manager -- VMs, NSGs, storage, AVD, Arc, Key Vault, Recovery Services, SQL, monitoring, and all resource types across your Azure subscription via az CLI and Python REST helpers. Supports both Azure Commercial and Azure Government (GCC/GCC High).
 compatibility:
   - platform: linux
     arch: amd64
     min_version: "2026.02.16"
 metadata:
   author: tendril-project
-  version: "2.1.0"
+  version: "3.0.0"
   tendril-bridge: "true"
   skill_scope: "bridge"
   tags:
@@ -22,6 +22,8 @@ metadata:
     - sql
     - arc
     - monitoring
+    - government
+    - gcc
 ---
 
 # Azure Resource Manager Bridge
@@ -30,20 +32,39 @@ Access your Azure subscription via Azure CLI and ARM REST API. Covers VMs, NSGs,
 
 This bridge supplements (does not replace) hardware Tendril agents deployed on Azure VMs. Hardware agents provide OS-level depth (services, logs, registry); this bridge provides ARM-level breadth (all Azure resource types, power state, cost data).
 
+## Cloud Environment
+
+This bridge supports both Azure Commercial and Azure Government. The target cloud is controlled by the `AZURE_CLOUD` environment variable:
+
+| AZURE_CLOUD | Portal | Login Endpoint | ARM Endpoint |
+|---|---|---|---|
+| `commercial` | portal.azure.com | login.microsoftonline.com | management.azure.com |
+| `usgovernment` | portal.azure.us | login.microsoftonline.us | management.usgovcloudapi.net |
+
+Both the az CLI and the Python REST helpers automatically use the correct endpoints based on this variable. No code changes are needed to switch between clouds -- just set `AZURE_CLOUD` in the `.env` file.
+
 ## Authentication
 
 Two authentication methods are available -- both use the same service principal:
 
-1. **az CLI** (primary): Service principal login at container startup via `az login --service-principal`. Pre-authenticated and ready for any `az` command.
-2. **Python MSAL** (helpers): `client_credentials` flow for compound workflows requiring custom logic.
+1. **az CLI** (primary): Service principal login at container startup via `az login --service-principal`. The correct cloud is set automatically (`az cloud set --name AzureUSGovernment` for Gov). Pre-authenticated and ready for any `az` command.
+2. **Python MSAL** (helpers): `client_credentials` flow for compound workflows requiring custom logic. Endpoints are selected automatically based on `AZURE_CLOUD`.
 
-**App Registration:** Configure via AZURE_CLIENT_ID
-**Tenant:** Configured via AZURE_TENANT_ID environment variable
-**Subscription:** Configured via az CLI login or service principal
+**Environment Variables:**
+
+| Variable | Purpose |
+|---|---|
+| `AZURE_CLOUD` | Target cloud: `usgovernment` or `commercial` |
+| `AZURE_TENANT_ID` | Entra ID tenant ID (from the tenant that owns the subscription) |
+| `ARM_CLIENT_ID` | App registration client ID (service principal) |
+| `ARM_CLIENT_SECRET` | App registration client secret |
+| `AZURE_SUBSCRIPTION_ID` | Target Azure subscription ID |
 
 **RBAC roles assigned:**
 - `Contributor` on subscription -- full read/write access to all ARM resources
 - `Desktop Virtualization Contributor` on subscription -- full read/write access to AVD resources
+
+**Government cloud note:** For Azure Government, the app registration must be created in the Government tenant (portal.azure.us), not the commercial tenant, because RBAC is scoped to the tenant that owns the subscription.
 
 ## Quick Start (az CLI)
 
@@ -251,10 +272,6 @@ Use `-o json` as the default for all az CLI queries. JSON preserves full respons
 | `-o tsv` | Scalar values from `length(@)` or flat string lists piped into shell tools (`sort`, `wc`, `uniq`). | `az vm list --query "length(@)" -o tsv` |
 | `-o table` | Only when the operator explicitly asks for human-readable display. Never as a default. | `az vm list -d -o table` (operator requested) |
 
-**Why not tsv for lists?** TSV strips keys, discards nesting, and silently corrupts multi-value fields (e.g., an array of IP addresses on a NIC becomes a single cell). A field that is `null` vs `""` is indistinguishable. JSON avoids all of these issues.
-
-**Why not table?** Table truncates long values to fit column widths, is unparseable by downstream tools, and discards all type information. It exists purely for terminal readability.
-
 ## API Quirks and Known Issues
 
 - **az CLI is primary:** Use `az` commands for all standard queries. Use Python helpers only for compound workflows.
@@ -264,6 +281,7 @@ Use `-o json` as the default for all az CLI queries. JSON preserves full respons
 - **Instance view for power state:** `az vm list` does not include power state; use `az vm list -d` or `--show-details` flag.
 - **Rate limits:** ARM has per-subscription rate limits (~12,000 reads/hour). The Python client handles 429s with `Retry-After` backoff.
 - **Cost Management queries:** Can be slow for large subscriptions. Use `MonthToDate` for quick results.
+- **Government cloud:** Some az CLI extensions or resource types may not be available in Azure Government. Check availability at https://learn.microsoft.com/en-us/azure/azure-government/compare-azure-government-global-azure.
 
 ## Hybrid Coverage Model
 

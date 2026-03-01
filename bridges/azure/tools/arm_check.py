@@ -3,6 +3,7 @@
 Health check for the Azure Resource Manager bridge.
 
 Validates environment variables are set and tests ARM API connectivity.
+Reports cloud environment (commercial vs usgovernment) in output.
 
 Usage:
     python3 arm_check.py
@@ -13,12 +14,12 @@ import sys
 import json
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from arm_client import ArmClient
+from arm_client import ArmClient, AZURE_CLOUD, ARM_BASE
 
 
 def check():
     """Run health checks and report status."""
-    checks = {}
+    checks = {"cloud": AZURE_CLOUD, "arm_endpoint": ARM_BASE}
 
     required_vars = [
         "AZURE_TENANT_ID", "ARM_CLIENT_ID", "ARM_CLIENT_SECRET", "AZURE_SUBSCRIPTION_ID"
