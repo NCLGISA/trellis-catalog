@@ -22,6 +22,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [munis](bridges/munis/) | container | erp | Tyler Munis ERP -- read-only ODBC access to financial, payroll, HR, and procurement data via Reporting Services |
 | [navex-policytech](bridges/navex-policytech/) | container | compliance | NAVEX PolicyTech -- search published policy & procedure documents via OpenSearch API (titles & links only; document content requires browser login; Professional plan required; unofficially supported) |
 | [nextdns](bridges/nextdns/) | container | networking | NextDNS protective DNS -- profile management, security/privacy settings, analytics, query logs, allowlist/denylist |
+| [nutanix-cvm](bridges/nutanix-cvm/) | host | hyperconverged | Nutanix CVM operations -- cluster health, VM management, storage capacity, alerts, hypervisor access via ncli/acli and passwordless SSH |
 | [servicedesk-plus](bridges/servicedesk-plus/) | container | itsm | ManageEngine ServiceDesk Plus Cloud -- changes, requests, problems, CMDB, assets |
 | [sophos-central](bridges/sophos-central/) | container | security | Sophos Central -- endpoint inventory, alerts, isolation, directory, policies, SIEM events, XDR Data Lake forensics |
 | [splunk](bridges/splunk/) | container | siem | Splunk Cloud & Enterprise -- ad-hoc SPL searches, saved searches, fired alerts, index inventory, server health via REST API |

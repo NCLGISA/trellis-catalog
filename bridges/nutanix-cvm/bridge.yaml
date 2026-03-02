@@ -1,0 +1,26 @@
+# ============================================================================
+# Tendril Bridge Manifest - Nutanix CVM
+# ============================================================================
+# Host-based skill for Nutanix Controller VMs (CVMs). Provides cluster health
+# monitoring, VM management, storage capacity tracking, alert triage,
+# protection domain status, and hypervisor access via ncli, acli, and
+# passwordless SSH to the local AHV host.
+# ============================================================================
+
+name: nutanix-cvm
+version: "2026.03.02.1"
+description: "Nutanix CVM operations skill for AHV-based hyper-converged infrastructure — cluster health, VM management, storage, alerts, and hypervisor access"
+
+deployment:
+  type: host
+  target_platform: linux
+  hostname: "nutanix-cvm"
+
+credentials: []
+
+dependencies: {}
+
+metadata:
+  author: "tendril-project"
+  category: "hyperconverged"
+  tags: "nutanix, cvm, ahv, hypervisor, hci, virtualization, storage, cluster, ncli, acli"
