@@ -1,0 +1,77 @@
+# ============================================================================
+# Tendril Bridge Manifest -- UniFi Network Controller
+# ============================================================================
+# Container bridge for Ubiquiti UniFi Network Controller management via the
+# UniFi REST API. Manages sites, devices (APs, switches, gateways), clients,
+# WLANs, network/VLAN configuration, DPI stats, and firmware operations.
+#
+# Validate: trellis validate unifi
+# Build:    trellis build unifi
+# Deploy:   trellis deploy unifi
+# ============================================================================
+
+name: unifi
+version: "2026.03.03.1"
+description: >
+  UniFi Network Controller bridge -- site, device, client, WLAN, and network
+  management via the UniFi REST API. Supports standard controllers and UniFi OS
+  gateways (UDM, UCG). Covers device inventory, client tracking, WLAN and
+  network/VLAN configuration, DPI traffic analytics, firmware management, and
+  configuration compliance auditing.
+license: Apache-2.0
+
+deployment:
+  type: container
+  hostname: "bridge-unifi"
+  timezone: "America/New_York"
+
+credentials:
+  - name: "UniFi Controller URL"
+    env_var: UNIFI_URL
+    description: >
+      Base URL of the UniFi Network Controller
+      (e.g. https://unifi.example.com:8443 for standard controllers,
+      or https://192.168.1.1 for UniFi OS gateways).
+    scope: "shared"
+    required: true
+
+  - name: "UniFi Username"
+    env_var: UNIFI_USERNAME
+    description: "Local admin username for the UniFi controller."
+    scope: "per-operator"
+    required: true
+
+  - name: "UniFi Password"
+    env_var: UNIFI_PASSWORD
+    description: "Password for the UniFi controller admin account."
+    scope: "per-operator"
+    required: true
+
+  - name: "UniFi Site"
+    env_var: UNIFI_SITE
+    description: >
+      Default site name (default: "default"). Used when no --site argument
+      is provided to tool scripts.
+    scope: "shared"
+    required: false
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "urllib3>=2.0.0"
+
+skill_scope: bridge
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/unifi_check.py --quick"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "rowan-county-it"
+  category: "network"
+  tags: "unifi, ubiquiti, network, wireless, access-points, switches, vlans, wifi"
+  platform_url: "https://ui.com/"
+  documentation: "https://ubntwiki.com/products/software/unifi-controller/api"
+  changelog: |
+    2026.03.03.1 - Initial container bridge: core triad, device/client/WLAN/network/stats/audit tools
