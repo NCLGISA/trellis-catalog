@@ -12,8 +12,8 @@ Authentication uses MSAL client_credentials flow:
 
 Environment variables (set in docker-compose.yml):
   AZURE_TENANT_ID      - Entra ID tenant ID
-  GRAPH_CLIENT_ID      - App registration client ID
-  GRAPH_CLIENT_SECRET  - App registration client secret
+  AZURE_CLIENT_ID      - App registration client ID
+  AZURE_CLIENT_SECRET  - App registration client secret
 """
 
 import os
@@ -31,8 +31,8 @@ except ImportError:
     pass
 
 TENANT_ID = os.getenv("AZURE_TENANT_ID", "")
-CLIENT_ID = os.getenv("GRAPH_CLIENT_ID", "")
-CLIENT_SECRET = os.getenv("GRAPH_CLIENT_SECRET", "")
+CLIENT_ID = os.getenv("AZURE_CLIENT_ID", "")
+CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET", "")
 
 TOKEN_URL_TEMPLATE = "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token"
 API_BASE = "https://graph.microsoft.com/v1.0"
@@ -61,8 +61,8 @@ class GraphClient:
                 "\n"
                 "Required environment variables:\n"
                 "  AZURE_TENANT_ID\n"
-                "  GRAPH_CLIENT_ID\n"
-                "  GRAPH_CLIENT_SECRET\n"
+                "  AZURE_CLIENT_ID\n"
+                "  AZURE_CLIENT_SECRET\n"
                 "\n"
                 "Create an App Registration in Entra ID with application\n"
                 "permissions for Microsoft Graph.\n",

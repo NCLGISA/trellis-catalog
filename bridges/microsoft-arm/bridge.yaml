@@ -1,19 +1,27 @@
 # ============================================================================
-# Tendril Bridge Manifest - Azure
+# Tendril Bridge Manifest -- Microsoft ARM (Azure Resource Manager)
 # ============================================================================
 # Azure Resource Manager bridge -- VMs, NSGs, storage, AVD, Arc, Key Vault,
 # Recovery Services, SQL, monitoring, and cost data via az CLI and REST API.
 # Supports both Azure Commercial and Azure Government (GCC/GCC High).
+#
+# Validate: trellis validate microsoft-arm
+# Build:    trellis build microsoft-arm
+# Deploy:   trellis deploy microsoft-arm
 # ============================================================================
 
-name: azure
-version: "2026.03.01.1"
-description: "Azure Resource Manager bridge for VMs, NSGs, storage, AVD, Arc, Key Vault, Recovery Services, SQL, and monitoring (Commercial and Government)"
+name: microsoft-arm
+version: "2026.03.04.1"
+description: >
+  Azure Resource Manager bridge for VMs, NSGs, storage, AVD, Arc, Key Vault,
+  Recovery Services, SQL, monitoring, and cost data via az CLI and Python REST
+  helpers. Supports Azure Commercial and Government (GCC/GCC High).
+license: Apache-2.0
 
 deployment:
   type: container
   base: "tendril-bridge-base:latest"
-  hostname: "bridge-azure"
+  hostname: "bridge-microsoft-arm"
   timezone: "UTC"
 
 credentials:
@@ -28,12 +36,12 @@ credentials:
     scope: "shared"
     required: true
   - name: "Azure Client ID"
-    env_var: "ARM_CLIENT_ID"
-    description: "App registration client ID (service principal)"
+    env_var: "AZURE_CLIENT_ID"
+    description: "App registration client ID (service principal with Contributor + Desktop Virtualization Contributor RBAC)"
     scope: "shared"
     required: true
   - name: "Azure Client Secret"
-    env_var: "ARM_CLIENT_SECRET"
+    env_var: "AZURE_CLIENT_SECRET"
     description: "App registration client secret"
     scope: "shared"
     required: true
@@ -58,7 +66,10 @@ dependencies:
     - "net-tools"
     - "traceroute"
     - "gnupg"
+    - "jq"
     - "azure-cli"
+
+skill_scope: bridge
 
 healthcheck:
   script: "python3 /opt/bridge/data/tools/arm_check.py"
@@ -69,11 +80,7 @@ metadata:
   author: "tendril-project"
   category: "cloud"
   tags: "azure, arm, compute, networking, avd, storage, keyvault, recovery, sql, arc, monitoring, government, gcc"
-
-canopy_references:
-  - id: "organizational-glossary"
-    description: "Org-wide terminology and abbreviation mappings"
-  - id: "server-discovery-workflow"
-    description: "Server discovery and CMDB documentation workflow for infrastructure inventory"
-  - id: "tendril-deploy-runbook"
-    description: "Tendril Root deployment runbook covering Docker and GitHub Actions on Azure VMs"
+  changelog: |
+    2026.03.04.1 - Renamed azure -> microsoft-arm, standardized env vars (AZURE_CLIENT_ID), added jq
+    2026.03.01.1 - Added GCC/Government cloud support, Dockerfile, docker-compose.yml
+    2026.02.19.1 - Initial catalog entry

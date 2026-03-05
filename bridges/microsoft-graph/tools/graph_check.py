@@ -18,8 +18,8 @@ import sys
 import requests
 
 TENANT_ID = os.environ.get("AZURE_TENANT_ID", "")
-CLIENT_ID = os.environ.get("GRAPH_CLIENT_ID", "")
-CLIENT_SECRET = os.environ.get("GRAPH_CLIENT_SECRET", "")
+CLIENT_ID = os.environ.get("AZURE_CLIENT_ID", "")
+CLIENT_SECRET = os.environ.get("AZURE_CLIENT_SECRET", "")
 
 TOKEN_URL = "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token"
 GRAPH_BASE = "https://graph.microsoft.com/v1.0"
@@ -29,8 +29,8 @@ def main():
     quick = "--quick" in sys.argv
     checks = {}
 
-    required = {"AZURE_TENANT_ID": TENANT_ID, "GRAPH_CLIENT_ID": CLIENT_ID,
-                "GRAPH_CLIENT_SECRET": CLIENT_SECRET}
+    required = {"AZURE_TENANT_ID": TENANT_ID, "AZURE_CLIENT_ID": CLIENT_ID,
+                "AZURE_CLIENT_SECRET": CLIENT_SECRET}
     env_status = {k: ("set" if v else "MISSING") for k, v in required.items()}
     checks["environment"] = env_status
 

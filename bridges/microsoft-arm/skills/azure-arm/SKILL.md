@@ -7,23 +7,25 @@ compatibility:
     min_version: "2026.02.16"
 metadata:
   author: tendril-project
-  version: "3.0.0"
+  version: "3.1.0"
   tendril-bridge: "true"
   skill_scope: "bridge"
   tags:
-    - azure
-    - arm
-    - compute
-    - networking
-    - avd
-    - storage
-    - keyvault
-    - recovery
-    - sql
-    - arc
-    - monitoring
-    - government
-    - gcc
+    department: []
+    discovery:
+      - azure
+      - arm
+      - compute
+      - networking
+      - avd
+      - storage
+      - keyvault
+      - recovery
+      - sql
+      - arc
+      - monitoring
+      - government
+      - gcc
 ---
 
 # Azure Resource Manager Bridge
@@ -56,8 +58,8 @@ Two authentication methods are available -- both use the same service principal:
 |---|---|
 | `AZURE_CLOUD` | Target cloud: `usgovernment` or `commercial` |
 | `AZURE_TENANT_ID` | Entra ID tenant ID (from the tenant that owns the subscription) |
-| `ARM_CLIENT_ID` | App registration client ID (service principal) |
-| `ARM_CLIENT_SECRET` | App registration client secret |
+| `AZURE_CLIENT_ID` | App registration client ID (service principal) |
+| `AZURE_CLIENT_SECRET` | App registration client secret |
 | `AZURE_SUBSCRIPTION_ID` | Target Azure subscription ID |
 
 **RBAC roles assigned:**
