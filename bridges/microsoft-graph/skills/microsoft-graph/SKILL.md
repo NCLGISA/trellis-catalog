@@ -7,23 +7,26 @@ compatibility:
     min_version: "2026.02.16"
 metadata:
   author: tendril-project
-  version: "2.2.0"
+  version: "2.4.0"
   tendril-bridge: "true"
+  skill_scope: "bridge"
   tags:
-    - microsoft
-    - m365
-    - graph
-    - entra-id
-    - exchange-online
-    - intune
-    - sharepoint
-    - teams
-    - defender
-    - laps
-    - conditional-access
-    - identity-protection
-    - copilot
-    - usage-reports
+    department: []
+    discovery:
+      - microsoft
+      - m365
+      - graph
+      - entra-id
+      - exchange-online
+      - intune
+      - sharepoint
+      - teams
+      - defender
+      - laps
+      - conditional-access
+      - identity-protection
+      - copilot
+      - usage-reports
 ---
 
 # Microsoft Graph API Bridge

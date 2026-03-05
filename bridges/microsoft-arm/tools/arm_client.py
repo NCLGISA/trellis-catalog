@@ -12,10 +12,10 @@ Authentication uses MSAL client_credentials flow:
 
 Environment variables (set in docker-compose.yml):
   AZURE_TENANT_ID        - Entra ID tenant ID
-  ARM_CLIENT_ID          - App registration client ID
-  ARM_CLIENT_SECRET      - App registration client secret
+  AZURE_CLIENT_ID        - App registration client ID
+  AZURE_CLIENT_SECRET    - App registration client secret
   AZURE_SUBSCRIPTION_ID  - Azure subscription ID
-  AZURE_CLOUD            - "usgovernment" (default) or "commercial"
+  AZURE_CLOUD            - "commercial" (default) or "usgovernment"
 """
 
 import os
@@ -33,8 +33,8 @@ except ImportError:
     pass
 
 TENANT_ID = os.getenv("AZURE_TENANT_ID", "")
-CLIENT_ID = os.getenv("ARM_CLIENT_ID", "")
-CLIENT_SECRET = os.getenv("ARM_CLIENT_SECRET", "")
+CLIENT_ID = os.getenv("AZURE_CLIENT_ID", "")
+CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET", "")
 SUBSCRIPTION_ID = os.getenv("AZURE_SUBSCRIPTION_ID", "")
 AZURE_CLOUD = os.getenv("AZURE_CLOUD", "usgovernment").lower()
 
@@ -81,8 +81,8 @@ class ArmClient:
                 "\n"
                 "Required environment variables:\n"
                 "  AZURE_TENANT_ID\n"
-                "  ARM_CLIENT_ID\n"
-                "  ARM_CLIENT_SECRET\n"
+                "  AZURE_CLIENT_ID\n"
+                "  AZURE_CLIENT_SECRET\n"
                 "  AZURE_SUBSCRIPTION_ID\n"
                 "\n"
                 "Create an App Registration in Entra ID with RBAC roles\n"

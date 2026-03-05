@@ -22,7 +22,7 @@ def check():
     checks = {"cloud": AZURE_CLOUD, "arm_endpoint": ARM_BASE}
 
     required_vars = [
-        "AZURE_TENANT_ID", "ARM_CLIENT_ID", "ARM_CLIENT_SECRET", "AZURE_SUBSCRIPTION_ID"
+        "AZURE_TENANT_ID", "AZURE_CLIENT_ID", "AZURE_CLIENT_SECRET", "AZURE_SUBSCRIPTION_ID"
     ]
     env_status = {}
     all_set = True

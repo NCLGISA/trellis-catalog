@@ -1,13 +1,25 @@
 # ============================================================================
-# Tendril Bridge Manifest - Microsoft Graph
+# Tendril Bridge Manifest -- Microsoft Graph
 # ============================================================================
 # Microsoft Graph API bridge -- Entra ID, Exchange Online, Intune, SharePoint,
-# Teams, Defender, LAPS, licenses, Conditional Access, and audit logs.
+# Teams, Defender, LAPS, licenses, Conditional Access, Global Secure Access,
+# and audit logs. Supports per-operator credentials for department-scoped
+# read-only access.
+#
+# Validate: trellis validate microsoft-graph
+# Build:    trellis build microsoft-graph
+# Deploy:   trellis deploy microsoft-graph
 # ============================================================================
 
 name: microsoft-graph
-version: "2026.02.19.1"
-description: "Microsoft Graph API bridge for Entra ID, Exchange Online, Intune, SharePoint, Teams, Defender, and LAPS"
+version: "2026.03.04.1"
+description: >
+  Microsoft Graph API bridge for Entra ID users/groups, Exchange Online
+  mailboxes, Intune devices/apps/config, SharePoint/OneDrive, Teams, Defender
+  security alerts/incidents, Identity Protection, Conditional Access, LAPS
+  passwords, licenses, audit logs, usage reports, and Global Secure Access.
+  Supports per-operator credentials for department-scoped read-only access.
+license: Apache-2.0
 
 deployment:
   type: container
@@ -18,25 +30,52 @@ deployment:
 credentials:
   - name: "Azure Tenant ID"
     env_var: "AZURE_TENANT_ID"
-    description: "Entra ID tenant ID for app registration authentication"
+    description: "Entra ID tenant ID for MSAL client_credentials authentication"
     scope: "shared"
     required: true
-  - name: "Graph Client ID"
-    env_var: "GRAPH_CLIENT_ID"
-    description: "App registration client ID with Graph API permissions"
+  - name: "Azure Client ID"
+    env_var: "AZURE_CLIENT_ID"
+    description: "App registration client ID with Graph API application permissions"
     scope: "shared"
     required: true
-  - name: "Graph Client Secret"
-    env_var: "GRAPH_CLIENT_SECRET"
+  - name: "Azure Client Secret"
+    env_var: "AZURE_CLIENT_SECRET"
     description: "App registration client secret"
     scope: "shared"
     required: true
+  - name: "Per-Operator Client ID"
+    env_var: "AZURE_CLIENT_ID"
+    description: >
+      Department-scoped app registration client ID. Injected via bridge_credentials
+      for non-IT operators. Overrides the container default for the duration of the
+      command execution. The scoped app MUST be read-only.
+    scope: "per-operator"
+    required: false
+  - name: "Per-Operator Client Secret"
+    env_var: "AZURE_CLIENT_SECRET"
+    description: >
+      Department-scoped app registration client secret. Injected via bridge_credentials
+      alongside the per-operator client ID.
+    scope: "per-operator"
+    required: false
 
 dependencies:
   pip:
     - "requests>=2.31.0"
     - "python-dotenv>=1.0.0"
     - "msal>=1.28.0"
+  system:
+    - "curl"
+    - "ca-certificates"
+    - "procps"
+    - "iputils-ping"
+    - "iproute2"
+    - "dnsutils"
+    - "net-tools"
+    - "traceroute"
+    - "jq"
+
+skill_scope: bridge
 
 healthcheck:
   script: "python3 /opt/bridge/data/tools/graph_check.py"
@@ -46,12 +85,7 @@ healthcheck:
 metadata:
   author: "tendril-project"
   category: "identity"
-  tags: "microsoft, m365, graph, entra-id, exchange-online, intune, sharepoint, teams, defender, laps"
-
-canopy_references:
-  - id: "organizational-glossary"
-    description: "Org-wide terminology and abbreviation mappings"
-  - id: "fleet-correlation"
-    description: "Cross-bridge fleet device correlation using Intune and Graph data"
-  - id: "server-discovery-workflow"
-    description: "Server discovery workflow leveraging Graph API for infrastructure inventory"
+  tags: "microsoft, m365, graph, entra-id, exchange-online, intune, sharepoint, teams, defender, laps, conditional-access, identity-protection, copilot, usage-reports"
+  changelog: |
+    2026.03.04.1 - Standardized env vars (AZURE_CLIENT_ID), added jq, per-operator credential pattern, ABAC tags
+    2026.02.19.1 - Initial catalog entry
