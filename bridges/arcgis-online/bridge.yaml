@@ -1,0 +1,63 @@
+# ============================================================================
+# Tendril Bridge Manifest -- ArcGIS Online
+# ============================================================================
+# REST API bridge for ArcGIS Online organizations -- content management,
+# user/group administration, feature service queries, geocoding, and portal
+# administration via OAuth2 client credentials.
+# ============================================================================
+
+name: arcgis-online
+version: "2026.03.06.1"
+description: "ArcGIS Online bridge for content management, user administration, feature services, geocoding, and portal administration via the ArcGIS REST API"
+license: Apache-2.0
+
+deployment:
+  type: container
+  base: "tendril-bridge-base:latest"
+  hostname: "bridge-arcgis-online"
+  timezone: "UTC"
+
+credentials:
+  - name: "Organization URL"
+    env_var: "ARCGIS_ORG_URL"
+    description: >
+      ArcGIS Online organization URL (e.g. https://orgname.maps.arcgis.com).
+      This is the portal URL for your ArcGIS Online organization.
+    scope: "shared"
+    required: true
+  - name: "Client ID"
+    env_var: "ARCGIS_CLIENT_ID"
+    description: >
+      OAuth2 application client ID. Register an application in your ArcGIS
+      Online org (Content > New Item > Application > Other Application) or
+      at developers.arcgis.com. Then configure privileges via Settings >
+      Application > Edit.
+    scope: "shared"
+    required: true
+  - name: "Client Secret"
+    env_var: "ARCGIS_CLIENT_SECRET"
+    description: >
+      OAuth2 application client secret. Paired with the client ID
+      for the client_credentials grant flow (server-to-server).
+    scope: "shared"
+    required: true
+
+dependencies:
+  pip:
+    - "requests>=2.31.0"
+    - "python-dotenv>=1.0.0"
+  system: []
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/arcgis_online_check.py"
+  interval: "120s"
+  timeout: "15s"
+
+metadata:
+  author: "NCLGISA"
+  category: "cloud"
+  tags: "arcgis, esri, gis, mapping, geospatial, feature-services, geocoding, portal"
+  platform_url: "https://www.arcgis.com"
+  documentation: "https://developers.arcgis.com/rest/"
+  changelog: |
+    2026.03.06.1 - Initial bridge with content, users, features, admin, and geocoding tools
