@@ -7,6 +7,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | Bridge | Type | Category | Description |
 |--------|------|----------|-------------|
 | [adobe-sign](bridges/adobe-sign/) | container | document-management | Adobe Acrobat Sign -- e-signatures, agreements, templates, web forms, audit trails |
+| [arcgis-online](bridges/arcgis-online/) | container | cloud | ArcGIS Online -- content management, user/group administration, feature services, geocoding, portal admin via OAuth2 client credentials |
 | [azure](bridges/azure/) | container | cloud | Azure Resource Manager (Commercial & Government) -- VMs, NSGs, storage, AVD, Arc, Key Vault, Recovery Services, SQL, monitoring, cost data via az CLI and REST API |
 | [confluence](bridges/confluence/) | container | collaboration | Confluence Cloud -- full CRUD for pages, CQL search with content retrieval, spaces, blog posts, comments, labels, tasks via REST API v2 (per-operator auth) |
 | [cloudflare](bridges/cloudflare/) | container | networking | Cloudflare API -- DNS, WAF, Zero Trust, tunnels |
