@@ -1,0 +1,23 @@
+services:
+  bridge-verizon-mybusiness:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bridge-verizon-mybusiness
+    restart: unless-stopped
+    environment:
+      - TENDRIL_INSTALL_KEY=${TENDRIL_INSTALL_KEY}
+      - TENDRIL_DOWNLOAD_URL=${TENDRIL_DOWNLOAD_URL}
+      - BRIDGE_SEED_VERSION=2026.03.07.1
+    volumes:
+      - verizon-data:/opt/bridge/data
+      - tendril-data:/opt/tendril
+    labels:
+      - tendril.bridge=verizon-mybusiness
+      - tendril.description=Verizon MyBusiness wireless fleet management
+
+volumes:
+  verizon-data:
+    driver: local
+  tendril-data:
+    driver: local

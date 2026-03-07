@@ -28,6 +28,7 @@ Battle-tested bridge definitions for the [Trellis](https://github.com/NCLGISA/tr
 | [sophos-central](bridges/sophos-central/) | container | security | Sophos Central -- endpoint inventory, alerts, isolation, directory, policies, SIEM events, XDR Data Lake forensics |
 | [splunk](bridges/splunk/) | container | siem | Splunk Cloud & Enterprise -- ad-hoc SPL searches, saved searches, fired alerts, index inventory, server health via REST API |
 | [ukg-ready](bridges/ukg-ready/) | container | hcm | UKG Ready (Kronos) -- employee directory, time & attendance, compensation, notifications, company configuration via REST API |
+| [verizon-mybusiness](bridges/verizon-mybusiness/) | container | telecom | Verizon MyBusiness -- wireless fleet inventory, IMEI/SIM detail, billing, upgrade eligibility, ForgeRock REST auth with SMS MFA |
 | [veeam-m365](bridges/veeam-m365/) | host | backup | Veeam Backup for Microsoft 365 -- backup jobs, granular restore, organization inventory |
 | [zoom](bridges/zoom/) | container | collaboration | Zoom Server-to-Server OAuth -- meetings, users, phone admin |
 

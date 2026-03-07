@@ -1,0 +1,56 @@
+# ============================================================================
+# Tendril Bridge Manifest -- Verizon MyBusiness
+# ============================================================================
+# Verizon MyBusiness wireless fleet management via ForgeRock REST auth with
+# programmatic SMS MFA. Per-operator credentials stored in Tendril vault.
+#
+# Validate:  trellis validate verizon-mybusiness
+# Build:     trellis build verizon-mybusiness
+# Deploy:    trellis deploy verizon-mybusiness
+# ============================================================================
+
+name: verizon-mybusiness
+version: "2026.03.07.1"
+description: "Verizon MyBusiness wireless fleet management bridge -- device inventory with IMEI/SIM, billing, upgrade eligibility, SIM protection, and cross-bridge correlation via ForgeRock REST auth with programmatic SMS MFA"
+license: Apache-2.0
+
+deployment:
+  type: container
+  base: "python:3.11-slim-bookworm"
+  hostname: "bridge-verizon-mybusiness"
+  timezone: "UTC"
+
+credentials:
+  - name: "Verizon Portal Username"
+    env_var: "VZ_USERNAME"
+    description: >
+      Verizon MyBusiness portal login username. Each operator uses their
+      own credentials. Obtain from your Verizon Business account administrator.
+    scope: "per-operator"
+    required: true
+
+  - name: "Verizon Portal Password"
+    env_var: "VZ_PASSWORD"
+    description: >
+      Verizon MyBusiness portal password. Paired with VZ_USERNAME for
+      ForgeRock SSO authentication. SMS MFA code is required at each
+      new session (submitted via auth_session.py).
+    scope: "per-operator"
+    required: true
+
+dependencies:
+  pip:
+    - "httpx[http2]>=0.28.0"
+
+healthcheck:
+  script: "python3 /opt/bridge/data/tools/verizon_check.py --quick"
+  interval: "60s"
+  timeout: "10s"
+
+metadata:
+  author: "tendril-project"
+  category: "telecom"
+  tags: "verizon, mybusiness, wireless, cellular, fleet, billing, sim, firstnet, forgerock, mfa"
+  platform_url: "https://mb.verizonwireless.com"
+  changelog: |
+    2026.03.07.1 - Initial catalog release with fleet inventory, device detail (IMEI/SIM), billing, upgrade eligibility, SIM protection, cross-bridge correlation, and ForgeRock REST auth with programmatic SMS MFA
